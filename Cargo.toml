@@ -1,0 +1,20 @@
+[package]
+name = "sudoku"
+version = "0.1.0"
+authors = ["Aaron Sky <asky@wayfair.com>"]
+license = "Apache-2.0"
+readme = "README.md"
+
+[profile.dev]
+opt-level = 1
+
+[dependencies]
+chrono = "0.4"
+failure = "0.1"
+fern = {version = "0.5", features = ["colored"] }
+ggez = "0.4"
+ggez-goodies = { git = "https://github.com/ggez/ggez-goodies", branch = "master" }
+log = "0.4"
+specs = "0.10"
+specs-derive = "0.1"
+warmy = "0.7"
