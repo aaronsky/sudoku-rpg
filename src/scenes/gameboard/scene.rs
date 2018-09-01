@@ -49,11 +49,12 @@ impl scene::Scene<World, input::InputEvent> for GameboardScene {
     }
 
     fn input(&mut self, _gameworld: &mut World, ev: input::InputEvent, started: bool) {
-        use ggez_goodies::input::InputEffect;
-        use input::Button;
+        use input::{events::InputEffect, Button};
         match (ev, self.gameboard.selected_cell) {
-            (InputEffect::Axis(axis, is_positive), _) if !started => self.gameboard.move_selection(axis, is_positive),
-            (InputEffect::Button(button), Some(ind)) => match button {
+            (InputEffect::Axis(axis, is_positive), _) if !started => {
+                self.gameboard.move_selection(axis, is_positive)
+            }
+            (InputEffect::Button(button, None), Some(ind)) => match button {
                 Button::Num1 => self.gameboard.set(ind, 1),
                 Button::Num2 => self.gameboard.set(ind, 2),
                 Button::Num3 => self.gameboard.set(ind, 3),
@@ -65,42 +66,20 @@ impl scene::Scene<World, input::InputEvent> for GameboardScene {
                 Button::Num9 => self.gameboard.set(ind, 9),
                 _ => {}
             },
+            (InputEffect::Button(Button::Select, Some((x, y))), _) => self.handle_mouse(x, y),
             (_, _) => {}
         }
     }
 }
 
-// impl event::EventHandler for GameboardScene {
-
-//     fn mouse_button_up_event(
-//         &mut self,
-//         _ctx: &mut Context,
-//         _button: MouseButton,
-//         _x: i32,
-//         _y: i32,
-//     ) {
-//         let x = self.cursor_pos[0] as f32 - self.gameboard_view.settings.position[0];
-//         let y = self.cursor_pos[1] as f32 - self.gameboard_view.settings.position[1];
-//         if x >= 0.0
-//             && x < self.gameboard_view.settings.size
-//             && y >= 0.0
-//             && y < self.gameboard_view.settings.size
-//         {
-//             let cell_x = (x / self.gameboard_view.settings.size * 9.0) as usize;
-//             let cell_y = (y / self.gameboard_view.settings.size * 9.0) as usize;
-//             self.gameboard.selected_cell = Some([cell_x, cell_y]);
-//         }
-//     }
-
-//     fn mouse_motion_event(
-//         &mut self,
-//         _ctx: &mut Context,
-//         _state: MouseState,
-//         x: i32,
-//         y: i32,
-//         _xrel: i32,
-//         _yrel: i32,
-//     ) {
-//         self.cursor_pos = [x, y];
-//     }
-// }
+impl GameboardScene {
+    fn handle_mouse(&mut self, x: i32, y: i32) {
+        let x = x as f32 - self.view.settings.position[0];
+        let y = y as f32 - self.view.settings.position[1];
+        if x >= 0.0 && x < self.view.settings.size && y >= 0.0 && y < self.view.settings.size {
+            let cell_x = (x / self.view.settings.size * 9.0) as usize;
+            let cell_y = (y / self.view.settings.size * 9.0) as usize;
+            self.gameboard.selected_cell = Some([cell_x, cell_y]);
+        }
+    }
+}

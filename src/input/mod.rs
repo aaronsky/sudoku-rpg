@@ -1,6 +1,6 @@
-//! Typedefs for input shortcuts.
+pub mod events;
+
 use ggez::event::*;
-use ggez_goodies::input;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum Button {
@@ -13,6 +13,7 @@ pub enum Button {
     Num7,
     Num8,
     Num9,
+    Select,
     Exit,
 }
 
@@ -22,15 +23,9 @@ pub enum Axis {
     Horz,
 }
 
-pub type InputBinding = input::InputBinding<Axis, Button>;
-pub type InputEvent = input::InputEffect<Axis, Button>;
-pub type InputState = input::InputState<Axis, Button>;
-
-pub trait MouseEventHandler {
-    fn mouse_button_down_event(&mut self, button: MouseButton, x: i32, y: i32) {}
-    fn mouse_button_up_event(&mut self, button: MouseButton, x: i32, y: i32) {}
-    fn mouse_motion_event(&mut self, state: MouseState, x: i32, y: i32, xrel: i32, yrel: i32) {}
-}
+pub type InputBinding = events::InputBinding<Axis, Button>;
+pub type InputEvent = events::InputEffect<Axis, Button>;
+pub type InputState = events::InputState<Axis, Button>;
 
 /// Create the default keybindings for our input state.
 pub fn create_input_binding() -> InputBinding {
@@ -49,4 +44,6 @@ pub fn create_input_binding() -> InputBinding {
         .bind_key_to_button(Keycode::Num8, Button::Num8)
         .bind_key_to_button(Keycode::Num9, Button::Num9)
         .bind_key_to_button(Keycode::Escape, Button::Exit)
+        .bind_mouse_to_button(MouseButton::Left, Button::Select)
+        .bind_mouse_motion()
 }

@@ -4,7 +4,6 @@
 //! to every `Scene`: specs objects, input state, asset cache.
 
 use ggez;
-use ggez_goodies::input as ginput;
 use specs;
 
 use warmy;
@@ -44,7 +43,7 @@ impl World {
 
         let mut the_world = Self {
             assets: store,
-            input: ginput::InputState::new(),
+            input: input::InputState::new(),
             specs_world: w,
         };
 

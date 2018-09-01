@@ -13,11 +13,11 @@ extern crate warmy;
 
 mod common;
 mod components;
+mod input;
 mod scenes;
 mod systems;
 mod world;
 
-use self::common::input::{self, MouseEventHandler};
 
 use ggez::conf;
 use ggez::event;
@@ -42,7 +42,7 @@ impl MainState {
         scenestack.push(initial_scene);
         MainState {
             scenes: scenestack,
-            input_binding: common::create_input_binding(),
+            input_binding: input::create_input_binding(),
         }
     }
 }
@@ -72,13 +72,13 @@ impl EventHandler for MainState {
         _keymod: Mod,
         _repeat: bool,
     ) {
-        if let Some(ev) = self.input_binding.resolve(keycode) {
+        if let Some(ev) = self.input_binding.resolve_key(keycode) {
             self.scenes.input(ev, true);
         }
     }
 
     fn key_up_event(&mut self, _ctx: &mut Context, keycode: Keycode, _keymod: Mod, _repeat: bool) {
-        if let Some(ev) = self.input_binding.resolve(keycode) {
+        if let Some(ev) = self.input_binding.resolve_key(keycode) {
             self.scenes.input(ev, false);
         }
     }
@@ -90,29 +90,29 @@ impl EventHandler for MainState {
         x: i32,
         y: i32,
     ) {
-        self.scenes.mouse_button_down_event(button, x, y);
+        if let Some(ev) = self.input_binding.resolve_mouse(button, x, y) {
+            self.scenes.input(ev, true);
+        }
     }
 
-    fn mouse_button_up_event(
-        &mut self,
-        _ctx: &mut Context,
-        button: MouseButton,
-        x: i32,
-        y: i32,
-    ) {
-        self.scenes.mouse_button_up_event(button, x, y);
+    fn mouse_button_up_event(&mut self, _ctx: &mut Context, button: MouseButton, x: i32, y: i32) {
+        if let Some(ev) = self.input_binding.resolve_mouse(button, x, y) {
+            self.scenes.input(ev, false);
+        }
     }
 
     fn mouse_motion_event(
         &mut self,
         _ctx: &mut Context,
-        state: MouseState,
+        _state: MouseState,
         x: i32,
         y: i32,
         xrel: i32,
         yrel: i32,
     ) {
-        self.scenes.mouse_motion_event(state, x, y, xrel, yrel);
+        if let Some(ev) = self.input_binding.resolve_mouse_motion(x, y, xrel, yrel) {
+            self.scenes.input(ev, false);
+        }
     }
 }
 

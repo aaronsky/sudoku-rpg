@@ -20,7 +20,7 @@ pub struct GameboardViewSettings {
 
 impl GameboardViewSettings {
     pub fn new(ctx: &mut Context) -> GameResult<GameboardViewSettings> {
-        let font = Font::new(ctx, "/fonts/FiraSans/FiraSans-Regular.ttf", 34)?;
+        let font = Font::new(ctx, "/fonts/Multicolore.ttf", 44)?;
         let numbers = [
             Text::new(ctx, "0", &font)?,
             Text::new(ctx, "1", &font)?,
@@ -111,17 +111,22 @@ impl GameboardView {
             for i in 0..9 {
                 if let Some(ind) = gameboard.get([i, j]) {
                     let text = &settings.numbers[ind as usize];
-                    let width = text.width() as f32;
-                    let pos = Point2::new(
-                        settings.position[0] + i as f32 * cell_size + width / 2.0,
+                    let [width, height] = [text.width() as f32 / 2.0, text.height() as f32 / 2.0];
+                    let [hpadding, vpadding] =
+                        [(cell_size - width) / 2.0, (cell_size - height) / 2.0];
+                    let [cell_x, cell_y] = [
+                        settings.position[0] + i as f32 * cell_size,
                         settings.position[1] + j as f32 * cell_size,
-                    );
+                    ];
+                    let text_pos = Point2::new(cell_x + hpadding, cell_y + vpadding + 4.0);
+                    let text_scale = Point2::new(0.5, 0.5);
                     graphics::draw_ex(
                         ctx,
                         text,
                         graphics::DrawParam {
-                            dest: pos,
+                            dest: text_pos,
                             color: Some(settings.text_color),
+                            scale: text_scale,
                             ..Default::default()
                         },
                     )?;
