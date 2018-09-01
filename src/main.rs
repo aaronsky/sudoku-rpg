@@ -5,6 +5,8 @@ extern crate fern;
 extern crate ggez;
 extern crate ggez_goodies;
 #[macro_use]
+extern crate lazy_static;
+#[macro_use]
 extern crate log;
 extern crate specs;
 #[macro_use]

@@ -10,16 +10,23 @@ use world::World;
 
 pub struct GameboardScene {
     gameboard: Gameboard,
-    view: GameboardView,
+    gameboard_view: GameboardView,
+    abilities_view: AbilitiesView,
+    timer_view: TimerView,
+    character_portrait_view: PortraitView,
+    opponent_portrait_view: PortraitView,
     dispatcher: specs::Dispatcher<'static, 'static>,
 }
 
 impl GameboardScene {
     pub fn new(ctx: &mut ggez::Context, _world: &mut World) -> Self {
-        let gameboard_view_settings = GameboardViewSettings::new(ctx).unwrap();
         GameboardScene {
             gameboard: Gameboard::new(),
-            view: GameboardView::new(gameboard_view_settings),
+            gameboard_view: GameboardView::new(GameboardViewSettings::new(ctx).unwrap()),
+            abilities_view: AbilitiesView::new(AbilitiesViewSettings::new()),
+            timer_view: TimerView::new(TimerViewSettings::new()),
+            character_portrait_view: PortraitView::new(PortraitViewSettings::new(500.0, 75.0)),
+            opponent_portrait_view: PortraitView::new(PortraitViewSettings::new(640.0, 75.0)),
             dispatcher: Self::register_systems(),
         }
     }
@@ -40,7 +47,11 @@ impl scene::Scene<World, input::InputEvent> for GameboardScene {
     }
 
     fn draw(&mut self, _gameworld: &mut World, ctx: &mut ggez::Context) -> ggez::GameResult<()> {
-        self.view.draw(ctx, &self.gameboard)?;
+        self.gameboard_view.draw(ctx, &self.gameboard)?;
+        self.abilities_view.draw(ctx, &[])?;
+        self.timer_view.draw(ctx, 0)?;
+        self.character_portrait_view.draw(ctx)?;
+        self.opponent_portrait_view.draw(ctx)?;
         Ok(())
     }
 
@@ -52,7 +63,7 @@ impl scene::Scene<World, input::InputEvent> for GameboardScene {
         use input::{events::InputEffect, Button};
         match (ev, self.gameboard.selected_cell) {
             (InputEffect::Axis(axis, is_positive), _) if !started => {
-                self.gameboard.move_selection(axis, is_positive)
+                self.gameboard.move_selected_cell(axis, is_positive)
             }
             (InputEffect::Button(button, None), Some(ind)) => match button {
                 Button::Num1 => self.gameboard.set(ind, 1),
@@ -74,11 +85,15 @@ impl scene::Scene<World, input::InputEvent> for GameboardScene {
 
 impl GameboardScene {
     fn handle_mouse(&mut self, x: i32, y: i32) {
-        let x = x as f32 - self.view.settings.position[0];
-        let y = y as f32 - self.view.settings.position[1];
-        if x >= 0.0 && x < self.view.settings.size && y >= 0.0 && y < self.view.settings.size {
-            let cell_x = (x / self.view.settings.size * 9.0) as usize;
-            let cell_y = (y / self.view.settings.size * 9.0) as usize;
+        let x = x as f32 - self.gameboard_view.settings.position[0];
+        let y = y as f32 - self.gameboard_view.settings.position[1];
+        if x >= 0.0
+            && x < self.gameboard_view.settings.size
+            && y >= 0.0
+            && y < self.gameboard_view.settings.size
+        {
+            let cell_x = (x / self.gameboard_view.settings.size * 9.0) as usize;
+            let cell_y = (y / self.gameboard_view.settings.size * 9.0) as usize;
             self.gameboard.selected_cell = Some([cell_x, cell_y]);
         }
     }

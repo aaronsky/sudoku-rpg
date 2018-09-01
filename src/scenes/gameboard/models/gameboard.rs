@@ -1,48 +1,48 @@
+use ggez::nalgebra::{zero, MatrixN as Matrix, U9};
 use input;
+use std::collections::HashSet;
 
-const SIZE: usize = 9;
+lazy_static! {
+    static ref FIXED_SET: HashSet<u8> = (1..=9).collect();
+}
 
 pub struct Gameboard {
-    cells: [[u8; SIZE]; SIZE],
+    cells: Matrix<u8, U9>,
     pub selected_cell: Option<[usize; 2]>,
     pub solved: bool,
 }
 
 impl Gameboard {
-    pub fn new() -> Gameboard {
+    pub fn new() -> Self {
         Gameboard {
-            cells: [[0; SIZE]; SIZE],
+            cells: zero(),
             selected_cell: None,
             solved: false,
         }
     }
 
     pub fn get(&self, ind: [usize; 2]) -> Option<u8> {
-        if let Some(cell) = self.cells.get(ind[1])?.get(ind[0]) {
-            match cell {
-                1..=9 => Some(*cell),
-                _ => None,
-            }
-        } else {
-            None
+        match self.cells[(ind[0], ind[1])] {
+            cell @ 1..=9 => Some(cell),
+            _ => None,
         }
     }
 
     pub fn set(&mut self, ind: [usize; 2], val: u8) {
-        self.cells[ind[1]][ind[0]] = val;
+        self.cells[(ind[0], ind[1])] = val;
     }
 
-    pub fn move_selection(&mut self, axis: input::Axis, is_positive: bool) {
-        let checked_add = |num1, num2| {
-            if num1 == SIZE - 1 {
+    pub fn move_selected_cell(&mut self, axis: input::Axis, is_positive: bool) {
+        let checked_add = |num1, num2, max| {
+            if num1 == max - 1 {
                 0
             } else {
                 num1 + num2
             }
         };
-        let checked_sub = |num1, num2| {
+        let checked_sub = |num1, num2, max| {
             if num1 == 0 {
-                SIZE - 1
+                max - 1
             } else {
                 num1 - num2
             }
@@ -51,25 +51,54 @@ impl Gameboard {
         self.selected_cell = match self.selected_cell {
             Some(current) => {
                 let [x, y] = current;
+                let (nrows, ncols) = self.cells.shape();
                 let new_x = if axis == input::Axis::Horz {
                     match is_positive {
-                        true => checked_add(x, 1),
-                        false => checked_sub(x, 1)
+                        true => checked_add(x, 1, nrows),
+                        false => checked_sub(x, 1, nrows),
                     }
                 } else {
                     x
                 };
                 let new_y = if axis == input::Axis::Vert {
                     match is_positive {
-                        false => checked_add(y, 1),
-                        true => checked_sub(y, 1),
+                        false => checked_add(y, 1, ncols),
+                        true => checked_sub(y, 1, ncols),
                     }
                 } else {
                     y
                 };
                 Some([new_x, new_y])
-            },
+            }
             None => Some([0, 0]),
         }
+    }
+
+    pub fn check_solution(&self) -> bool {
+        // check each row
+        // check each column
+        // check each grid
+        false
+    }
+
+    fn check_row(&self, ind: usize) -> bool {
+        // let row = self.cells.row(ind);
+        // let blanks = row.iter().filter(|v| **v == 0).count();
+        // if blanks > 0 {
+        //     false
+        // } else {
+        //     let row_set: HashSet<_> = row.iter().filter(|v| **v != 0).collect();
+        //     row_set.len() == FIXED_SET.len()
+        // }
+        false
+    }
+
+    fn check_col(&self, ind: usize) -> bool {
+        // let column = self.cells.fold
+        false
+    }
+
+    fn check_grid(&self, row: usize, col: usize) -> bool {
+        false
     }
 }

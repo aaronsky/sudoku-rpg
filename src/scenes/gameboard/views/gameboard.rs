@@ -7,10 +7,9 @@ pub struct GameboardViewSettings {
     pub size: f32,
     pub background_color: Color,
     pub border_color: Color,
-    pub board_edge_color: Color,
     pub section_edge_color: Color,
     pub cell_edge_color: Color,
-    pub board_edge_radius: f32,
+    pub border_radius: f32,
     pub section_edge_radius: f32,
     pub cell_edge_radius: f32,
     pub selected_cell_background_color: Color,
@@ -38,10 +37,9 @@ impl GameboardViewSettings {
             size: 400.0,
             background_color: From::from([0.8, 0.8, 1.0, 1.0]),
             border_color: From::from([0.0, 0.0, 0.0, 1.0]),
-            board_edge_color: From::from([0.0, 0.0, 0.0, 1.0]),
             section_edge_color: From::from([0.0, 0.0, 0.0, 1.0]),
             cell_edge_color: From::from([0.0, 0.0, 0.0, 1.0]),
-            board_edge_radius: 25.0,
+            border_radius: 25.0,
             section_edge_radius: 4.0,
             cell_edge_radius: 1.0,
             selected_cell_background_color: From::from([0.9, 0.9, 1.0, 1.0]),
@@ -56,7 +54,7 @@ pub struct GameboardView {
 }
 
 impl GameboardView {
-    pub fn new(settings: GameboardViewSettings) -> GameboardView {
+    pub fn new(settings: GameboardViewSettings) -> Self {
         GameboardView { settings }
     }
 
@@ -66,15 +64,15 @@ impl GameboardView {
         let ref settings = self.settings;
 
         // TODO: Temporary border until we get the asset
-        graphics::set_color(ctx, settings.board_edge_color)?;
+        graphics::set_color(ctx, settings.border_color)?;
         graphics::rectangle(
             ctx,
             DrawMode::Fill,
             Rect::new(
-                settings.position[0] - 25.0,
-                settings.position[1] - 25.0,
-                settings.size + 50.0,
-                settings.size + 50.0,
+                settings.position[0] - settings.border_radius,
+                settings.position[1] - settings.border_radius,
+                settings.size + settings.border_radius * 2.0,
+                settings.size + settings.border_radius * 2.0,
             ),
         )?;
 
