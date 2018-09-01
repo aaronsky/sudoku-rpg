@@ -1,19 +1,28 @@
 sudo: true
 language: rust
+os:
+  - linux
 rust:
   - stable
   - beta
   - nightly
+matrix:
+  allow_failures:
+    - rust: nightly
+
+before_install:
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
+      sudo apt-get -qq update
+      && sudo apt-get install -y libasound2-dev;
+    fi
 
 install:
-  - wget http://libsdl.org/release/SDL2-2.0.5.tar.gz
-  - tar -xzvf SDL2-2.0.5.tar.gz
-  - pushd SDL2-2.0.5 && ./configure --prefix=/usr && make && sudo make install && popd
-
-  - wget https://www.libsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.1.tar.gz
-  - tar -xzvf SDL2_mixer-2.0.1.tar.gz
-  - pushd SDL2_mixer-2.0.1 && ./configure --prefix=/usr && make && sudo make install && popd
-
-  - wget https://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.1.tar.gz
-  - tar -xzvf SDL2_image-2.0.1.tar.gz
-  - pushd SDL2_image-2.0.1 && ./configure --prefix=/usr && make && sudo make install && popd
+  - if [ "${TRAVIS_OS_NAME}" = "linux" ]; then
+      wget http://libsdl.org/release/SDL2-2.0.5.tar.gz
+      && tar -xzvf SDL2-2.0.5.tar.gz
+      && pushd SDL2-2.0.5 && ./configure --prefix=/usr && make && sudo make install && popd;
+    fi
+  - if [ "${TRAVIS_OS_NAME}" = "osx" ]; then
+      brew update
+      && brew install sdl2;
+    fi
