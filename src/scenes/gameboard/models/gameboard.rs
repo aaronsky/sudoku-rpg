@@ -8,7 +8,7 @@ lazy_static! {
 
 pub struct Gameboard {
     cells: Matrix<u8, U9>,
-    pub selected_cell: Option<[usize; 2]>,
+    pub selected_cell: Option<(usize, usize)>,
     pub solved: bool,
 }
 
@@ -21,15 +21,19 @@ impl Gameboard {
         }
     }
 
-    pub fn get(&self, ind: [usize; 2]) -> Option<u8> {
-        match self.cells[(ind[0], ind[1])] {
+    pub fn get(&self, ind: (usize, usize)) -> Option<u8> {
+        match self.cells[ind] {
             cell @ 1..=9 => Some(cell),
             _ => None,
         }
     }
 
-    pub fn set(&mut self, ind: [usize; 2], val: u8) {
-        self.cells[(ind[0], ind[1])] = val;
+    pub fn set(&mut self, ind: (usize, usize), val: u8) {
+        self.cells[ind] = val;
+    }
+
+    pub fn clear(&mut self, ind: (usize, usize)) {
+        self.cells[ind] = 0;
     }
 
     pub fn move_selected_cell(&mut self, axis: input::Axis, is_positive: bool) {
@@ -50,7 +54,7 @@ impl Gameboard {
 
         self.selected_cell = match self.selected_cell {
             Some(current) => {
-                let [x, y] = current;
+                let (x, y) = current;
                 let (nrows, ncols) = self.cells.shape();
                 let new_x = if axis == input::Axis::Horz {
                     match is_positive {
@@ -68,9 +72,9 @@ impl Gameboard {
                 } else {
                     y
                 };
-                Some([new_x, new_y])
+                Some((new_x, new_y))
             }
-            None => Some([0, 0]),
+            None => Some((0, 0)),
         }
     }
 

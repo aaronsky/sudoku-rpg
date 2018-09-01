@@ -30,15 +30,48 @@ impl GameboardScene {
     pub fn new(ctx: &mut Context, world: &mut World) -> Self {
         GameboardScene {
             gameboard: Gameboard::new(),
-            character: Character::new("Main", "main.png", ctx, world),
-            opponent: Character::new("Opponent", "ghosts.png", ctx, world),
+            character: Character::new(
+                "Main",
+                CharacterKind::Character,
+                "placeholder.png",
+                ctx,
+                world,
+            ).add_ability(Ability::new(
+                "Reveal Numbers",
+                "placeholder.png",
+                ctx,
+                world,
+            )),
+            opponent: Character::new(
+                "Opponent",
+                CharacterKind::Opponent,
+                "placeholder.png",
+                ctx,
+                world,
+            ),
 
-            background_view: BackgroundView::new(BackgroundViewSettings::new("area-1.png", ctx, world).unwrap()),
-            gameboard_view: GameboardView::new(GameboardViewSettings::new("area-1-board.png", ctx, world).unwrap()),
-            abilities_view: AbilitiesView::new(AbilitiesViewSettings::new()),
-            timer_view: TimerView::new(TimerViewSettings::new()),
-            character_portrait_view: PortraitView::new(PortraitViewSettings::new(500.0, 75.0)),
-            opponent_portrait_view: PortraitView::new(PortraitViewSettings::new(640.0, 75.0)),
+            background_view: BackgroundView::new(
+                BackgroundViewSettings::new("area-1.png", ctx, world).unwrap(),
+            ),
+            gameboard_view: GameboardView::new(
+                GameboardViewSettings::new("area-1-board.png", ctx, world).unwrap(),
+            ),
+            abilities_view: AbilitiesView::new(AbilitiesViewSettings::new(ctx, world)),
+            timer_view: TimerView::new(TimerViewSettings::new(ctx, world)),
+            character_portrait_view: PortraitView::new(PortraitViewSettings::new(
+                CharacterKind::Character,
+                500.0,
+                75.0,
+                ctx,
+                world,
+            )),
+            opponent_portrait_view: PortraitView::new(PortraitViewSettings::new(
+                CharacterKind::Opponent,
+                640.0,
+                75.0,
+                ctx,
+                world,
+            )),
 
             dispatcher: Self::register_systems(),
         }
@@ -80,6 +113,7 @@ impl scene::Scene<World, input::InputEvent> for GameboardScene {
                 self.gameboard.move_selected_cell(axis, is_positive)
             }
             (InputEffect::Button(button, None), Some(ind)) => match button {
+                Button::Delete => self.gameboard.clear(ind),
                 Button::Num1 => self.gameboard.set(ind, 1),
                 Button::Num2 => self.gameboard.set(ind, 2),
                 Button::Num3 => self.gameboard.set(ind, 3),
@@ -99,16 +133,18 @@ impl scene::Scene<World, input::InputEvent> for GameboardScene {
 
 impl GameboardScene {
     fn handle_mouse(&mut self, x: i32, y: i32) {
-        let x = x as f32 - self.gameboard_view.settings.position[0];
-        let y = y as f32 - self.gameboard_view.settings.position[1];
-        if x >= 0.0
+        let x = x as f32 - self.gameboard_view.settings.position.x;
+        let y = y as f32 - self.gameboard_view.settings.position.y;
+        self.gameboard.selected_cell = if x >= 0.0
             && x < self.gameboard_view.settings.size
             && y >= 0.0
             && y < self.gameboard_view.settings.size
         {
             let cell_x = (x / self.gameboard_view.settings.size * 9.0) as usize;
             let cell_y = (y / self.gameboard_view.settings.size * 9.0) as usize;
-            self.gameboard.selected_cell = Some([cell_x, cell_y]);
+            Some((cell_x, cell_y))
+        } else {
+            None
         }
     }
 }

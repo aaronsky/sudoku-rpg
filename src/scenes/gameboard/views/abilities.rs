@@ -1,23 +1,31 @@
 use super::super::models::Ability;
-use ggez::graphics::{self, Color, Point2};
+use common::colors;
+use common::resources;
+use common::util::*;
+use ggez::graphics::{self, Point2, Rect};
 use ggez::{Context, GameResult};
+use warmy;
+use world::World;
+
+const PLACEHOLDER_SIZE: f32 = 70.0;
+const LEADING_PADDING: f32 = 15.0;
 
 pub struct AbilitiesViewSettings {
-    pub position: [f32; 2],
-    pub size: [f32; 2],
-    pub background_color: Color,
-    pub border_color: Color,
-    pub border_radius: f32,
+    pub position: Point2,
+    pub size: Point2,
+    background: warmy::Res<resources::Image>,
 }
 
 impl AbilitiesViewSettings {
-    pub fn new() -> Self {
+    pub fn new(ctx: &mut Context, world: &mut World) -> Self {
+        let background = world
+            .assets
+            .get::<_, resources::Image>(&warmy::FSKey::new("/images/ui/ability-container.png"), ctx)
+            .unwrap();
         AbilitiesViewSettings {
-            position: [500.0, 215.0],
-            size: [270.0, 100.0],
-            background_color: From::from([0.8, 0.8, 1.0, 1.0]),
-            border_color: From::from([0.0, 0.0, 0.0, 1.0]),
-            border_radius: 4.0,
+            position: Point2::new(500.0, 215.0),
+            size: Point2::new(270.0, 100.0),
+            background,
         }
     }
 }
@@ -32,28 +40,70 @@ impl AbilitiesView {
     }
 
     pub fn draw(&self, ctx: &mut Context, abilities: &[Ability]) -> GameResult<()> {
-        use ggez::graphics::{DrawMode, Rect};
-
         let ref settings = self.settings;
 
-        for ability in abilities {
-            let pos = Point2::new(settings.position[0], settings.position[1]);
-            graphics::draw(ctx, &(ability.icon.borrow().0), pos, 0.0)?;
+        graphics::set_color(ctx, graphics::WHITE)?;
+
+        let background = &(settings.background.borrow().0);
+        let pos = Point2::new(settings.position.x, settings.position.y);
+        graphics::draw(ctx, background, pos, 0.0)?;
+
+        let sum_of_widths = PLACEHOLDER_SIZE * 3.0;
+        let horizontal_padding =
+            (background.width() as f32 - LEADING_PADDING - sum_of_widths) / 3.0;
+        for (i, ability) in abilities.iter().enumerate() {
+            self.draw_ability_at_index(ctx, Some(ability), i as u32, horizontal_padding)?;
         }
 
-        // TODO: Temporary border until we get the asset
-        graphics::set_color(ctx, settings.border_color)?;
-        graphics::rectangle(
-            ctx,
-            DrawMode::Line(settings.border_radius),
-            Rect::new(
-                settings.position[0],
-                settings.position[1],
-                settings.size[0],
-                settings.size[1],
-            ),
-        )?;
+        if abilities.len() < 3 {
+            for i in abilities.len()..3 {
+                self.draw_ability_at_index(ctx, None, i as u32, horizontal_padding)?;
+            }
+        }
 
+        Ok(())
+    }
+
+    fn draw_ability_at_index(
+        &self,
+        ctx: &mut Context,
+        ability: Option<&Ability>,
+        index: u32,
+        horizontal_padding: f32,
+    ) -> GameResult<()> {
+        let ref settings = self.settings;
+        let get_pos = |width, height, container_height| {
+            let x =
+                settings.position.x + LEADING_PADDING + (horizontal_padding + width) * index as f32;
+            center_rect_vertically(
+                Rect::new(x, settings.position.y, 0.0, height),
+                container_height,
+            )
+        };
+
+        let background = &(settings.background.borrow().0);
+        if let Some(ability) = ability {
+            let icon = &(ability.icon.borrow().0);
+            let pos = get_pos(
+                icon.width() as f32,
+                icon.height() as f32,
+                background.height() as f32,
+            );
+            if ability.usable {
+                graphics::set_color(ctx, graphics::WHITE)?;
+            } else {
+                graphics::set_color(ctx, colors::GRAY)?;
+            }
+            graphics::draw(ctx, &(ability.icon.borrow().0), pos, 0.0)?;
+        } else {
+            let pos = get_pos(70.0, 70.0, background.height() as f32);
+            graphics::set_color(ctx, graphics::BLACK)?;
+            graphics::rectangle(
+                ctx,
+                graphics::DrawMode::Fill,
+                Rect::new(pos.x, pos.y, 70.0, 70.0),
+            )?;
+        }
         Ok(())
     }
 }

@@ -1,22 +1,25 @@
+use common::resources;
+use ggez::graphics::{self, Point2};
 use ggez::{Context, GameResult};
-use ggez::graphics::{self, Color};
+use warmy;
+use world::World;
 
 pub struct TimerViewSettings {
     pub position: [f32; 2],
     pub size: [f32; 2],
-    pub background_color: Color,
-    pub border_color: Color,
-    pub border_radius: f32
+    background: warmy::Res<resources::Image>,
 }
 
 impl TimerViewSettings {
-    pub fn new() -> Self {
+    pub fn new(ctx: &mut Context, world: &mut World) -> Self {
+        let background = world
+            .assets
+            .get::<_, resources::Image>(&warmy::FSKey::new("/images/ui/timer-container.png"), ctx)
+            .unwrap();
         TimerViewSettings {
             position: [500.0, 435.0],
             size: [270.0, 100.0],
-            background_color: From::from([0.8, 0.8, 1.0, 1.0]),
-            border_color: From::from([0.0, 0.0, 0.0, 1.0]),
-            border_radius: 4.0
+            background,
         }
     }
 }
@@ -31,35 +34,13 @@ impl TimerView {
     }
 
     pub fn draw(&self, ctx: &mut Context, time: u64) -> GameResult<()> {
-        use ggez::graphics::{DrawMode, Rect};
-
         let ref settings = self.settings;
 
-        graphics::set_color(ctx, settings.background_color)?;
-        graphics::rectangle(
-            ctx,
-            DrawMode::Fill,
-            Rect::new(
-                settings.position[0],
-                settings.position[1],
-                settings.size[0],
-                settings.size[1],
-            ),
-        )?;
+        graphics::set_color(ctx, graphics::WHITE)?;
 
-        // TODO: Temporary border until we get the asset
-        graphics::set_color(ctx, settings.border_color)?;
-        graphics::rectangle(
-            ctx,
-            DrawMode::Line(settings.border_radius),
-            Rect::new(
-                settings.position[0],
-                settings.position[1],
-                settings.size[0],
-                settings.size[1],
-            ),
-        )?;
-        
+        let pos = Point2::new(settings.position[0], settings.position[1]);
+        graphics::draw(ctx, &(settings.background.borrow().0), pos, 0.0)?;
+
         Ok(())
     }
 }

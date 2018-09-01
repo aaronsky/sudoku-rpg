@@ -20,7 +20,6 @@ mod scenes;
 mod systems;
 mod world;
 
-
 use ggez::conf;
 use ggez::event;
 use ggez::*;
@@ -85,13 +84,7 @@ impl EventHandler for MainState {
         }
     }
 
-    fn mouse_button_down_event(
-        &mut self,
-        _ctx: &mut Context,
-        button: MouseButton,
-        x: i32,
-        y: i32,
-    ) {
+    fn mouse_button_down_event(&mut self, _ctx: &mut Context, button: MouseButton, x: i32, y: i32) {
         if let Some(ev) = self.input_binding.resolve_mouse(button, x, y) {
             self.scenes.input(ev, true);
         }

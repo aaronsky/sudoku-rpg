@@ -1,5 +1,5 @@
 use common::resources;
-use ggez::graphics::{self, Point2, DrawParam};
+use ggez::graphics::{self, DrawParam, Point2};
 use ggez::{Context, GameResult};
 use warmy;
 use world::World;
@@ -32,14 +32,20 @@ impl BackgroundView {
     pub fn draw(&self, ctx: &mut Context) -> GameResult<()> {
         let ref settings = self.settings;
 
+        graphics::set_color(ctx, graphics::WHITE)?;
+
         let pos: Point2 = Point2::new(0.0, 0.0);
         let scale = Point2::new(1.0, 1.0);
 
-        graphics::draw_ex(ctx, &(settings.image.borrow().0), DrawParam {
-            dest: pos,
-            scale: scale,
-            ..Default::default()
-        })?;
+        graphics::draw_ex(
+            ctx,
+            &(settings.image.borrow().0),
+            DrawParam {
+                dest: pos,
+                scale: scale,
+                ..Default::default()
+            },
+        )?;
         Ok(())
     }
 }

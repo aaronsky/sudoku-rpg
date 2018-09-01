@@ -19,9 +19,7 @@ pub struct World {
 }
 
 impl World {
-    fn register_components(&mut self) {
-        
-    }
+    fn register_components(&mut self) {}
 
     pub fn new(ctx: &mut ggez::Context, resource_dir: Option<path::PathBuf>) -> Self {
         // We to bridge the gap between ggez and warmy path

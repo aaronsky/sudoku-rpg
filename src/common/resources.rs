@@ -21,7 +21,8 @@ use common::error::*;
 ///
 /// TODO: With warmy 0.7 this should not be necessary, figure it out.
 fn warmy_to_ggez_path(path: &path::Path, root: &path::Path) -> path::PathBuf {
-    let stripped_path = path.strip_prefix(root)
+    let stripped_path = path
+        .strip_prefix(root)
         .expect("warmy path is outside of the warmy store?  Should never happen.");
     path::Path::new("/").join(stripped_path)
 }
@@ -90,7 +91,7 @@ impl warmy::Load<ggez::Context> for SoundData {
 #[derive(Debug, Clone)]
 pub struct Font(pub graphics::Font);
 impl warmy::Load<ggez::Context> for Font {
-    type Key = warmy::FSKey;
+    type Key = FSFontKey;
     type Error = failure::Compat<GgezError>;
     fn load(
         key: Self::Key,
@@ -100,8 +101,56 @@ impl warmy::Load<ggez::Context> for Font {
         let path = warmy_to_ggez_path(key.as_path(), store.root());
         debug!("Loading font {:?} from file {:?}", path, key.as_path());
 
-        graphics::Font::new(ctx, path, 12)
+        graphics::Font::new(ctx, path, key.1)
             .map(|x| warmy::Loaded::from(Font(x)))
             .map_err(|e| GgezError::from(e).compat())
+    }
+}
+
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub struct FSFontKey(path::PathBuf, u32);
+
+impl FSFontKey {
+    /// Create a new `FSKey` by providing a VFS path.
+    ///
+    /// The VFS path should start with a leading `"/"` (yet it’s not enforced). This VFS path will
+    /// get transformed by a `Store` when used by inspecting the `Store`’s root.
+    pub fn new<P>(path: P, points: u32) -> Self
+    where
+        P: AsRef<path::Path>,
+    {
+        FSFontKey(path.as_ref().to_owned(), points)
+    }
+
+    /// Get the underlying path.
+    pub fn as_path(&self) -> &path::Path {
+        self.0.as_path()
+    }
+}
+
+impl From<FSFontKey> for warmy::DepKey {
+    fn from(key: FSFontKey) -> Self {
+        warmy::DepKey::Path(key.0)
+    }
+}
+
+impl warmy::Key for FSFontKey {
+    fn prepare_key(self, root: &path::Path) -> Self {
+        FSFontKey(vfs_substite_path(self.as_path(), root), self.1)
+    }
+}
+
+/// Substitute a VFS path by a real one.
+fn vfs_substite_path(path: &path::Path, root: &path::Path) -> path::PathBuf {
+    let mut components = path.components().peekable();
+    let root_components = root.components();
+
+    match components.peek() {
+        Some(&path::Component::RootDir) => {
+            // drop the root component
+            root_components.chain(components.skip(1)).collect()
+        }
+
+        _ => root_components.chain(components).collect(),
     }
 }

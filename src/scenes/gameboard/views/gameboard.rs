@@ -1,43 +1,60 @@
 use super::super::models::Gameboard;
 use common::resources;
-use ggez::graphics::{self, Color, Font, Point2, Text};
+use common::util::*;
+use ggez::graphics::{self, Color, Point2, Text};
 use ggez::{Context, GameResult};
 use warmy;
 use world::World;
 
 pub struct GameboardViewSettings {
-    pub position: [f32; 2],
+    pub position: Point2,
     pub size: f32,
-    pub background_color: Color,
     pub section_edge_color: Color,
     pub cell_edge_color: Color,
-    pub border_radius: f32,
     pub section_edge_radius: f32,
     pub cell_edge_radius: f32,
     pub selected_cell_background_color: Color,
     pub text_color: Color,
-    numbers: [Text; 10],
+    numbers: [NumberView; 10],
     background: warmy::Res<resources::Image>,
 }
 
+struct NumberView(Text, Color);
+
+impl NumberView {
+    fn width(&self) -> u32 {
+        self.0.width()
+    }
+
+    fn height(&self) -> u32 {
+        self.0.height()
+    }
+}
+
 impl GameboardViewSettings {
-    pub fn new(background_image_asset: &str, ctx: &mut Context, world: &mut World) -> GameResult<Self> {
+    pub fn new(
+        background_image_asset: &str,
+        ctx: &mut Context,
+        world: &mut World,
+    ) -> GameResult<Self> {
         let warmy_font = world
             .assets
-            .get::<_, resources::Font>(&warmy::FSKey::new("/fonts/Multicolore.ttf"), ctx)
-            .unwrap();
+            .get::<_, resources::Font>(
+                &resources::FSFontKey::new("/fonts/Multicolore.ttf", 44),
+                ctx,
+            ).unwrap();
         let font = &(warmy_font.borrow().0);
         let numbers = [
-            Text::new(ctx, "0", &font)?,
-            Text::new(ctx, "1", &font)?,
-            Text::new(ctx, "2", &font)?,
-            Text::new(ctx, "3", &font)?,
-            Text::new(ctx, "4", &font)?,
-            Text::new(ctx, "5", &font)?,
-            Text::new(ctx, "6", &font)?,
-            Text::new(ctx, "7", &font)?,
-            Text::new(ctx, "8", &font)?,
-            Text::new(ctx, "9", &font)?,
+            NumberView(Text::new(ctx, "0", &font)?, Color::from_rgb(0, 0, 0)),
+            NumberView(Text::new(ctx, "1", &font)?, Color::from_rgb(244, 54, 54)),
+            NumberView(Text::new(ctx, "2", &font)?, Color::from_rgb(255, 133, 0)),
+            NumberView(Text::new(ctx, "3", &font)?, Color::from_rgb(254, 193, 7)),
+            NumberView(Text::new(ctx, "4", &font)?, Color::from_rgb(139, 194, 74)),
+            NumberView(Text::new(ctx, "5", &font)?, Color::from_rgb(0, 151, 86)),
+            NumberView(Text::new(ctx, "6", &font)?, Color::from_rgb(0, 188, 213)),
+            NumberView(Text::new(ctx, "7", &font)?, Color::from_rgb(33, 150, 243)),
+            NumberView(Text::new(ctx, "8", &font)?, Color::from_rgb(91, 50, 183)),
+            NumberView(Text::new(ctx, "9", &font)?, Color::from_rgb(165, 40, 170)),
         ];
         let background = world
             .assets
@@ -46,12 +63,10 @@ impl GameboardViewSettings {
                 ctx,
             ).unwrap();
         Ok(GameboardViewSettings {
-            position: [55.0, 100.0],
+            position: Point2::new(55.0, 100.0),
             size: 400.0,
-            background_color: From::from([0.8, 0.8, 1.0, 1.0]),
             section_edge_color: From::from([0.0, 0.0, 0.0, 1.0]),
             cell_edge_color: From::from([0.0, 0.0, 0.0, 1.0]),
-            border_radius: 25.0,
             section_edge_radius: 4.0,
             cell_edge_radius: 1.0,
             selected_cell_background_color: From::from([0.9, 0.9, 1.0, 1.0]),
@@ -76,56 +91,24 @@ impl GameboardView {
 
         let ref settings = self.settings;
 
-        let background_pos = Point2::new(
-            settings.position[0] - settings.border_radius,
-            settings.position[1] - settings.border_radius,
-        );
-        let background_scale = Point2::new(0.5, 0.5);
-        graphics::draw_ex(
+        graphics::set_color(ctx, graphics::WHITE)?;
+        graphics::draw(
             ctx,
             &(self.settings.background.borrow().0),
-            graphics::DrawParam {
-                dest: background_pos,
-                scale: background_scale,
-                ..Default::default()
-            },
+            Point2::new(settings.position.x - 25.0, settings.position.y - 25.0),
+            0.0,
         )?;
 
-        // TODO: Temporary border until we get the asset
-        // graphics::set_color(ctx, settings.border_color)?;
-        // graphics::rectangle(
-        //     ctx,
-        //     DrawMode::Fill,
-        //     Rect::new(
-        //         ,
-        //         ,
-        //         settings.size + settings.border_radius * 2.0,
-        //         settings.size + settings.border_radius * 2.0,
-        //     ),
-        // )?;
-
-        graphics::set_color(ctx, settings.background_color)?;
-        graphics::rectangle(
-            ctx,
-            DrawMode::Fill,
-            Rect::new(
-                settings.position[0],
-                settings.position[1],
-                settings.size,
-                settings.size,
-            ),
-        )?;
-
-        if let Some(ind) = gameboard.selected_cell {
+        if let Some((x, y)) = gameboard.selected_cell {
             let cell_size = settings.size / 9.0;
-            let pos = [ind[0] as f32 * cell_size, ind[1] as f32 * cell_size];
+            let pos = Point2::new(x as f32 * cell_size, y as f32 * cell_size);
             graphics::set_color(ctx, settings.selected_cell_background_color)?;
             graphics::rectangle(
                 ctx,
                 DrawMode::Fill,
                 Rect::new(
-                    settings.position[0] + pos[0],
-                    settings.position[1] + pos[1],
+                    settings.position.x + pos.x,
+                    settings.position.y + pos.y,
                     cell_size,
                     cell_size,
                 ),
@@ -135,23 +118,29 @@ impl GameboardView {
         let cell_size = settings.size / 9.0;
         for j in 0..9 {
             for i in 0..9 {
-                if let Some(ind) = gameboard.get([i, j]) {
+                if let Some(ind) = gameboard.get((i, j)) {
                     let text = &settings.numbers[ind as usize];
-                    let [width, height] = [text.width() as f32 / 2.0, text.height() as f32 / 2.0];
-                    let [hpadding, vpadding] =
-                        [(cell_size - width) / 2.0, (cell_size - height) / 2.0];
-                    let [cell_x, cell_y] = [
-                        settings.position[0] + i as f32 * cell_size,
-                        settings.position[1] + j as f32 * cell_size,
-                    ];
-                    let text_pos = Point2::new(cell_x + hpadding, cell_y + vpadding + 4.0);
+                    let text_pos = center_rect_in_rect(
+                        Rect::new(
+                            0.0,
+                            0.0,
+                            text.width() as f32 / 2.0,
+                            text.height() as f32 / 2.0,
+                        ),
+                        Rect::new(
+                            settings.position.x + i as f32 * cell_size,
+                            settings.position.y + j as f32 * cell_size,
+                            cell_size,
+                            cell_size,
+                        ),
+                    );
                     let text_scale = Point2::new(0.5, 0.5);
                     graphics::draw_ex(
                         ctx,
-                        text,
+                        &text.0,
                         graphics::DrawParam {
-                            dest: text_pos,
-                            color: Some(settings.text_color),
+                            dest: Point2::new(text_pos.x, text_pos.y + 4.0),
+                            color: Some(text.1),
                             scale: text_scale,
                             ..Default::default()
                         },
@@ -183,15 +172,15 @@ impl GameboardView {
             if (i % cells_per_section) == 0 {
                 continue;
             }
-            let x = settings.position[0] + i as f32 / 9.0 * settings.size;
-            let y = settings.position[1] + i as f32 / 9.0 * settings.size;
-            let x2 = settings.position[0] + settings.size;
-            let y2 = settings.position[1] + settings.size;
+            let x = settings.position.x + i as f32 / 9.0 * settings.size;
+            let y = settings.position.y + i as f32 / 9.0 * settings.size;
+            let x2 = settings.position.x + settings.size;
+            let y2 = settings.position.y + settings.size;
 
-            let vline = &[Point2::new(x, settings.position[1]), Point2::new(x, y2)];
+            let vline = &[Point2::new(x, settings.position.y), Point2::new(x, y2)];
             mb.line(vline, settings.cell_edge_radius);
 
-            let hline = &[Point2::new(settings.position[0], y), Point2::new(x2, y)];
+            let hline = &[Point2::new(settings.position.x, y), Point2::new(x2, y)];
             mb.line(hline, settings.cell_edge_radius);
         }
         mb.build(ctx)
@@ -204,16 +193,16 @@ impl GameboardView {
     ) -> GameResult<graphics::Mesh> {
         let ref settings = self.settings;
         let mut mb = graphics::MeshBuilder::new();
-        for i in 0..sections {
-            let x = settings.position[0] + i as f32 / 3.0 * settings.size;
-            let y = settings.position[1] + i as f32 / 3.0 * settings.size;
-            let x2 = settings.position[0] + settings.size;
-            let y2 = settings.position[1] + settings.size;
+        for i in 1..sections {
+            let x = settings.position.x + i as f32 / 3.0 * settings.size;
+            let y = settings.position.y + i as f32 / 3.0 * settings.size;
+            let x2 = settings.position.x + settings.size;
+            let y2 = settings.position.y + settings.size;
 
-            let vline = &[Point2::new(x, settings.position[1]), Point2::new(x, y2)];
+            let vline = &[Point2::new(x, settings.position.y), Point2::new(x, y2)];
             mb.line(vline, settings.section_edge_radius);
 
-            let hline = &[Point2::new(settings.position[0], y), Point2::new(x2, y)];
+            let hline = &[Point2::new(settings.position.x, y), Point2::new(x2, y)];
             mb.line(hline, settings.section_edge_radius);
         }
         mb.build(ctx)

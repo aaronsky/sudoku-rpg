@@ -14,6 +14,7 @@ pub enum Button {
     Num8,
     Num9,
     Select,
+    Delete,
     Exit,
 }
 
@@ -31,9 +32,13 @@ pub type InputState = events::InputState<Axis, Button>;
 pub fn create_input_binding() -> InputBinding {
     InputBinding::new()
         .bind_key_to_axis(Keycode::Up, Axis::Vert, true)
+        .bind_key_to_axis(Keycode::W, Axis::Vert, true)
         .bind_key_to_axis(Keycode::Down, Axis::Vert, false)
+        .bind_key_to_axis(Keycode::S, Axis::Vert, false)
         .bind_key_to_axis(Keycode::Left, Axis::Horz, false)
+        .bind_key_to_axis(Keycode::A, Axis::Horz, false)
         .bind_key_to_axis(Keycode::Right, Axis::Horz, true)
+        .bind_key_to_axis(Keycode::D, Axis::Horz, true)
         .bind_key_to_button(Keycode::Num1, Button::Num1)
         .bind_key_to_button(Keycode::Num2, Button::Num2)
         .bind_key_to_button(Keycode::Num3, Button::Num3)
@@ -44,6 +49,8 @@ pub fn create_input_binding() -> InputBinding {
         .bind_key_to_button(Keycode::Num8, Button::Num8)
         .bind_key_to_button(Keycode::Num9, Button::Num9)
         .bind_key_to_button(Keycode::Escape, Button::Exit)
+        .bind_key_to_button(Keycode::Delete, Button::Delete)
+        .bind_key_to_button(Keycode::Backspace, Button::Delete)
         .bind_mouse_to_button(MouseButton::Left, Button::Select)
         .bind_mouse_motion()
 }

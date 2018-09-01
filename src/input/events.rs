@@ -106,8 +106,10 @@ where
     }
 
     pub fn bind_mouse_motion(mut self) -> Self {
-        self.bindings
-            .insert(InputType::MouseMotionEvent, InputEffect::MouseMotion(0, 0, 0, 0));
+        self.bindings.insert(
+            InputType::MouseMotionEvent,
+            InputEffect::MouseMotion(0, 0, 0, 0),
+        );
         self
     }
 
@@ -116,8 +118,15 @@ where
         self.bindings.get(&InputType::KeyEvent(keycode)).cloned()
     }
 
-    pub fn resolve_mouse(&self, mouse: MouseButton, x: i32, y: i32) -> Option<InputEffect<Axes, Buttons>> {
-        if let Some(InputEffect::Button(button, _)) = self.bindings.get(&InputType::MouseButtonEvent(mouse)) {
+    pub fn resolve_mouse(
+        &self,
+        mouse: MouseButton,
+        x: i32,
+        y: i32,
+    ) -> Option<InputEffect<Axes, Buttons>> {
+        if let Some(InputEffect::Button(button, _)) =
+            self.bindings.get(&InputType::MouseButtonEvent(mouse))
+        {
             Some(InputEffect::Button(button.clone(), Some((x, y))))
         } else {
             None
