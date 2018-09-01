@@ -27,9 +27,9 @@ pub type InputEvent = input::InputEffect<Axis, Button>;
 pub type InputState = input::InputState<Axis, Button>;
 
 pub trait MouseEventHandler {
-    fn mouse_button_down_event(&mut self, button: MouseButton, x: i32, y: i32);
-    fn mouse_button_up_event(&mut self, button: MouseButton, x: i32, y: i32);
-    fn mouse_motion_event(&mut self, state: MouseState, x: i32, y: i32, xrel: i32, yrel: i32);
+    fn mouse_button_down_event(&mut self, button: MouseButton, x: i32, y: i32) {}
+    fn mouse_button_up_event(&mut self, button: MouseButton, x: i32, y: i32) {}
+    fn mouse_motion_event(&mut self, state: MouseState, x: i32, y: i32, xrel: i32, yrel: i32) {}
 }
 
 /// Create the default keybindings for our input state.

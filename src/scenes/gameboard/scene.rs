@@ -48,16 +48,11 @@ impl scene::Scene<World, input::InputEvent> for GameboardScene {
         "Game Board"
     }
 
-    fn input(&mut self, _gameworld: &mut World, ev: input::InputEvent, _started: bool) {
+    fn input(&mut self, _gameworld: &mut World, ev: input::InputEvent, started: bool) {
         use ggez_goodies::input::InputEffect;
-        use input::{Axis, Button};
+        use input::Button;
         match (ev, self.gameboard.selected_cell) {
-            (InputEffect::Axis(axis, is_positive), _) => match (axis, is_positive) {
-                (Axis::Horz, false) => println!("left!"),
-                (Axis::Horz, true) => println!("right!"),
-                (Axis::Vert, false) => println!("down!"),
-                (Axis::Vert, true) => println!("up!"),
-            },
+            (InputEffect::Axis(axis, is_positive), _) if !started => self.gameboard.move_selection(axis, is_positive),
             (InputEffect::Button(button), Some(ind)) => match button {
                 Button::Num1 => self.gameboard.set(ind, 1),
                 Button::Num2 => self.gameboard.set(ind, 2),

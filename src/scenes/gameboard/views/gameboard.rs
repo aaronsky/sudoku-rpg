@@ -34,18 +34,18 @@ impl GameboardViewSettings {
             Text::new(ctx, "9", &font)?,
         ];
         Ok(GameboardViewSettings {
-            position: [10.0; 2],
+            position: [55.0, 100.0],
             size: 400.0,
             background_color: From::from([0.8, 0.8, 1.0, 1.0]),
-            border_color: From::from([0.0, 0.0, 0.2, 1.0]),
-            board_edge_color: From::from([0.0, 0.0, 0.2, 1.0]),
-            section_edge_color: From::from([0.0, 0.0, 0.2, 1.0]),
-            cell_edge_color: From::from([0.0, 0.0, 0.2, 1.0]),
-            board_edge_radius: 3.0,
-            section_edge_radius: 2.0,
+            border_color: From::from([0.0, 0.0, 0.0, 1.0]),
+            board_edge_color: From::from([0.0, 0.0, 0.0, 1.0]),
+            section_edge_color: From::from([0.0, 0.0, 0.0, 1.0]),
+            cell_edge_color: From::from([0.0, 0.0, 0.0, 1.0]),
+            board_edge_radius: 25.0,
+            section_edge_radius: 4.0,
             cell_edge_radius: 1.0,
             selected_cell_background_color: From::from([0.9, 0.9, 1.0, 1.0]),
-            text_color: From::from([0.0, 0.0, 0.1, 1.0]),
+            text_color: From::from([0.0, 0.0, 0.0, 1.0]),
             numbers,
         })
     }
@@ -64,6 +64,20 @@ impl GameboardView {
         use ggez::graphics::{DrawMode, Rect};
 
         let ref settings = self.settings;
+
+        // TODO: Temporary border until we get the asset
+        graphics::set_color(ctx, settings.board_edge_color)?;
+        graphics::rectangle(
+            ctx,
+            DrawMode::Fill,
+            Rect::new(
+                settings.position[0] - 25.0,
+                settings.position[1] - 25.0,
+                settings.size + 50.0,
+                settings.size + 50.0,
+            ),
+        )?;
+
         graphics::set_color(ctx, settings.background_color)?;
         graphics::rectangle(
             ctx,
@@ -122,18 +136,6 @@ impl GameboardView {
         let section_edge_mesh = self.build_section_edge_mesh(ctx, 3)?;
         graphics::set_color(ctx, settings.section_edge_color)?;
         graphics::draw_ex(ctx, &section_edge_mesh, Default::default())?;
-
-        graphics::set_color(ctx, settings.board_edge_color)?;
-        graphics::rectangle(
-            ctx,
-            DrawMode::Line(settings.board_edge_radius),
-            Rect::new(
-                settings.position[0],
-                settings.position[1],
-                settings.size,
-                settings.size,
-            ),
-        )?;
 
         Ok(())
     }
