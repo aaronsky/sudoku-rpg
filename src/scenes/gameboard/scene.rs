@@ -1,32 +1,45 @@
-use ggez;
+use ggez::*;
 use ggez_goodies::scene;
 use specs;
 
-use super::models::Gameboard;
+use super::models::*;
 use super::views::*;
 use input;
 use scenes::*;
 use world::World;
 
 pub struct GameboardScene {
+    // Models
     gameboard: Gameboard,
+    character: Character,
+    opponent: Character,
+
+    // Views
+    background_view: BackgroundView,
     gameboard_view: GameboardView,
     abilities_view: AbilitiesView,
     timer_view: TimerView,
     character_portrait_view: PortraitView,
     opponent_portrait_view: PortraitView,
+
+    // Component dispatcher
     dispatcher: specs::Dispatcher<'static, 'static>,
 }
 
 impl GameboardScene {
-    pub fn new(ctx: &mut ggez::Context, _world: &mut World) -> Self {
+    pub fn new(ctx: &mut Context, world: &mut World) -> Self {
         GameboardScene {
             gameboard: Gameboard::new(),
-            gameboard_view: GameboardView::new(GameboardViewSettings::new(ctx).unwrap()),
+            character: Character::new("Main", "main.png", ctx, world),
+            opponent: Character::new("Opponent", "ghosts.png", ctx, world),
+
+            background_view: BackgroundView::new(BackgroundViewSettings::new("area-1.png", ctx, world).unwrap()),
+            gameboard_view: GameboardView::new(GameboardViewSettings::new("area-1-board.png", ctx, world).unwrap()),
             abilities_view: AbilitiesView::new(AbilitiesViewSettings::new()),
             timer_view: TimerView::new(TimerViewSettings::new()),
             character_portrait_view: PortraitView::new(PortraitViewSettings::new(500.0, 75.0)),
             opponent_portrait_view: PortraitView::new(PortraitViewSettings::new(640.0, 75.0)),
+
             dispatcher: Self::register_systems(),
         }
     }
@@ -46,12 +59,13 @@ impl scene::Scene<World, input::InputEvent> for GameboardScene {
         }
     }
 
-    fn draw(&mut self, _gameworld: &mut World, ctx: &mut ggez::Context) -> ggez::GameResult<()> {
+    fn draw(&mut self, _gameworld: &mut World, ctx: &mut Context) -> GameResult<()> {
+        self.background_view.draw(ctx)?;
         self.gameboard_view.draw(ctx, &self.gameboard)?;
-        self.abilities_view.draw(ctx, &[])?;
+        self.abilities_view.draw(ctx, &self.character.abilities)?;
         self.timer_view.draw(ctx, 0)?;
-        self.character_portrait_view.draw(ctx)?;
-        self.opponent_portrait_view.draw(ctx)?;
+        self.character_portrait_view.draw(ctx, &self.character)?;
+        self.opponent_portrait_view.draw(ctx, &self.opponent)?;
         Ok(())
     }
 

@@ -1,12 +1,14 @@
 use super::super::models::Gameboard;
+use common::resources;
 use ggez::graphics::{self, Color, Font, Point2, Text};
 use ggez::{Context, GameResult};
+use warmy;
+use world::World;
 
 pub struct GameboardViewSettings {
     pub position: [f32; 2],
     pub size: f32,
     pub background_color: Color,
-    pub border_color: Color,
     pub section_edge_color: Color,
     pub cell_edge_color: Color,
     pub border_radius: f32,
@@ -15,11 +17,16 @@ pub struct GameboardViewSettings {
     pub selected_cell_background_color: Color,
     pub text_color: Color,
     numbers: [Text; 10],
+    background: warmy::Res<resources::Image>,
 }
 
 impl GameboardViewSettings {
-    pub fn new(ctx: &mut Context) -> GameResult<GameboardViewSettings> {
-        let font = Font::new(ctx, "/fonts/Multicolore.ttf", 44)?;
+    pub fn new(background_image_asset: &str, ctx: &mut Context, world: &mut World) -> GameResult<Self> {
+        let warmy_font = world
+            .assets
+            .get::<_, resources::Font>(&warmy::FSKey::new("/fonts/Multicolore.ttf"), ctx)
+            .unwrap();
+        let font = &(warmy_font.borrow().0);
         let numbers = [
             Text::new(ctx, "0", &font)?,
             Text::new(ctx, "1", &font)?,
@@ -32,11 +39,16 @@ impl GameboardViewSettings {
             Text::new(ctx, "8", &font)?,
             Text::new(ctx, "9", &font)?,
         ];
+        let background = world
+            .assets
+            .get::<_, resources::Image>(
+                &warmy::FSKey::new(format!("/images/backgrounds/{}", background_image_asset)),
+                ctx,
+            ).unwrap();
         Ok(GameboardViewSettings {
             position: [55.0, 100.0],
             size: 400.0,
             background_color: From::from([0.8, 0.8, 1.0, 1.0]),
-            border_color: From::from([0.0, 0.0, 0.0, 1.0]),
             section_edge_color: From::from([0.0, 0.0, 0.0, 1.0]),
             cell_edge_color: From::from([0.0, 0.0, 0.0, 1.0]),
             border_radius: 25.0,
@@ -45,6 +57,7 @@ impl GameboardViewSettings {
             selected_cell_background_color: From::from([0.9, 0.9, 1.0, 1.0]),
             text_color: From::from([0.0, 0.0, 0.0, 1.0]),
             numbers,
+            background,
         })
     }
 }
@@ -63,18 +76,33 @@ impl GameboardView {
 
         let ref settings = self.settings;
 
-        // TODO: Temporary border until we get the asset
-        graphics::set_color(ctx, settings.border_color)?;
-        graphics::rectangle(
+        let background_pos = Point2::new(
+            settings.position[0] - settings.border_radius,
+            settings.position[1] - settings.border_radius,
+        );
+        let background_scale = Point2::new(0.5, 0.5);
+        graphics::draw_ex(
             ctx,
-            DrawMode::Fill,
-            Rect::new(
-                settings.position[0] - settings.border_radius,
-                settings.position[1] - settings.border_radius,
-                settings.size + settings.border_radius * 2.0,
-                settings.size + settings.border_radius * 2.0,
-            ),
+            &(self.settings.background.borrow().0),
+            graphics::DrawParam {
+                dest: background_pos,
+                scale: background_scale,
+                ..Default::default()
+            },
         )?;
+
+        // TODO: Temporary border until we get the asset
+        // graphics::set_color(ctx, settings.border_color)?;
+        // graphics::rectangle(
+        //     ctx,
+        //     DrawMode::Fill,
+        //     Rect::new(
+        //         ,
+        //         ,
+        //         settings.size + settings.border_radius * 2.0,
+        //         settings.size + settings.border_radius * 2.0,
+        //     ),
+        // )?;
 
         graphics::set_color(ctx, settings.background_color)?;
         graphics::rectangle(
