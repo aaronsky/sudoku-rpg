@@ -17,7 +17,7 @@ mod scenes;
 mod systems;
 mod world;
 
-use self::common::input;
+use self::common::input::{self, MouseEventHandler};
 
 use ggez::conf;
 use ggez::event;
@@ -86,35 +86,33 @@ impl EventHandler for MainState {
     fn mouse_button_down_event(
         &mut self,
         _ctx: &mut Context,
-        _button: MouseButton,
-        _x: i32,
-        _y: i32,
+        button: MouseButton,
+        x: i32,
+        y: i32,
     ) {
-        // TODO
+        self.scenes.mouse_button_down_event(button, x, y);
     }
 
-    /// A mouse button was released
     fn mouse_button_up_event(
         &mut self,
         _ctx: &mut Context,
-        _button: MouseButton,
-        _x: i32,
-        _y: i32,
+        button: MouseButton,
+        x: i32,
+        y: i32,
     ) {
-        // TODO
+        self.scenes.mouse_button_up_event(button, x, y);
     }
 
-    /// The mouse was moved; it provides both absolute x and y coordinates in the window,
-    /// and relative x and y coordinates compared to its last position.
     fn mouse_motion_event(
         &mut self,
         _ctx: &mut Context,
-        _state: MouseState,
-        _x: i32,
-        _y: i32,
-        _xrel: i32,
-        _yrel: i32,
+        state: MouseState,
+        x: i32,
+        y: i32,
+        xrel: i32,
+        yrel: i32,
     ) {
+        self.scenes.mouse_motion_event(state, x, y, xrel, yrel);
     }
 }
 
@@ -147,40 +145,3 @@ pub fn main() {
         println!("Game exited cleanly.");
     }
 }
-
-// extern crate ggez;
-
-// mod models;
-// mod scenes;
-// mod views;
-
-// use ggez::conf;
-// use ggez::event;
-// use ggez::Context;
-// use std::env;
-// use std::path;
-
-// use scenes::GameboardScene;
-
-// fn main() {
-//     let config = conf::Conf::new();
-//     let ctx = &mut Context::load_from_conf("sudoku", "sky", config).unwrap();
-
-//     if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {
-//         let mut path = path::PathBuf::from(manifest_dir);
-//         path.push("assets");
-//         ctx.filesystem.mount(&path, true);
-//     }
-
-//     println!("Full filesystem info: {:#?}", ctx.filesystem);
-
-//     println!("Resource stats:");
-//     ctx.print_resource_stats();
-
-//     let main = &mut GameboardScene::new(ctx).expect("Could not create main scene");
-//     if let Err(e) = event::run(ctx, main) {
-//         println!("Error encountered: {}", e);
-//     } else {
-//         println!("Game exited cleanly.");
-//     }
-// }

@@ -15,7 +15,7 @@ pub struct GameboardScene {
 }
 
 impl GameboardScene {
-    pub fn new(ctx: &mut ggez::Context, world: &mut World) -> Self {
+    pub fn new(ctx: &mut ggez::Context, _world: &mut World) -> Self {
         let gameboard_view_settings = GameboardViewSettings::new(ctx).unwrap();
         GameboardScene {
             gameboard: Gameboard::new(),
@@ -39,7 +39,7 @@ impl scene::Scene<World, input::InputEvent> for GameboardScene {
         }
     }
 
-    fn draw(&mut self, gameworld: &mut World, ctx: &mut ggez::Context) -> ggez::GameResult<()> {
+    fn draw(&mut self, _gameworld: &mut World, ctx: &mut ggez::Context) -> ggez::GameResult<()> {
         self.view.draw(ctx, &self.gameboard)?;
         Ok(())
     }
@@ -48,14 +48,34 @@ impl scene::Scene<World, input::InputEvent> for GameboardScene {
         "Game Board"
     }
 
-    fn input(&mut self, gameworld: &mut World, ev: input::InputEvent, _started: bool) {
-        debug!("Input: {:?}", ev);
+    fn input(&mut self, _gameworld: &mut World, ev: input::InputEvent, _started: bool) {
+        use ggez_goodies::input::InputEffect;
+        use input::{Axis, Button};
+        match (ev, self.gameboard.selected_cell) {
+            (InputEffect::Axis(axis, is_positive), _) => match (axis, is_positive) {
+                (Axis::Horz, false) => println!("left!"),
+                (Axis::Horz, true) => println!("right!"),
+                (Axis::Vert, false) => println!("down!"),
+                (Axis::Vert, true) => println!("up!"),
+            },
+            (InputEffect::Button(button), Some(ind)) => match button {
+                Button::Num1 => self.gameboard.set(ind, 1),
+                Button::Num2 => self.gameboard.set(ind, 2),
+                Button::Num3 => self.gameboard.set(ind, 3),
+                Button::Num4 => self.gameboard.set(ind, 4),
+                Button::Num5 => self.gameboard.set(ind, 5),
+                Button::Num6 => self.gameboard.set(ind, 6),
+                Button::Num7 => self.gameboard.set(ind, 7),
+                Button::Num8 => self.gameboard.set(ind, 8),
+                Button::Num9 => self.gameboard.set(ind, 9),
+                _ => {}
+            },
+            (_, _) => {}
+        }
     }
 }
 
-
 // impl event::EventHandler for GameboardScene {
-
 
 //     fn mouse_button_up_event(
 //         &mut self,
@@ -87,35 +107,5 @@ impl scene::Scene<World, input::InputEvent> for GameboardScene {
 //         _yrel: i32,
 //     ) {
 //         self.cursor_pos = [x, y];
-//     }
-
-//     fn key_down_event(
-//         &mut self,
-//         _ctx: &mut Context,
-//         keycode: Keycode,
-//         _keymod: Mod,
-//         _repeat: bool,
-//     ) {
-//         if let Some(ind) = self.gameboard.selected_cell {
-//             match keycode {
-//                 Keycode::Num1 => self.gameboard.set(ind, 1),
-//                 Keycode::Num2 => self.gameboard.set(ind, 2),
-//                 Keycode::Num3 => self.gameboard.set(ind, 3),
-//                 Keycode::Num4 => self.gameboard.set(ind, 4),
-//                 Keycode::Num5 => self.gameboard.set(ind, 5),
-//                 Keycode::Num6 => self.gameboard.set(ind, 6),
-//                 Keycode::Num7 => self.gameboard.set(ind, 7),
-//                 Keycode::Num8 => self.gameboard.set(ind, 8),
-//                 Keycode::Num9 => self.gameboard.set(ind, 9),
-//                 _ => {}
-//             }
-//         }
-//         match keycode {
-//             Keycode::Left | Keycode::A => println!("left!"),
-//             Keycode::Up | Keycode::W => println!("up!"),
-//             Keycode::Right | Keycode::D => println!("right!"),
-//             Keycode::Down | Keycode::S => println!("down!"),
-//             _ => {}
-//         }
 //     }
 // }

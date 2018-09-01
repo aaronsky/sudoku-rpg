@@ -26,9 +26,15 @@ pub type InputBinding = input::InputBinding<Axis, Button>;
 pub type InputEvent = input::InputEffect<Axis, Button>;
 pub type InputState = input::InputState<Axis, Button>;
 
+pub trait MouseEventHandler {
+    fn mouse_button_down_event(&mut self, button: MouseButton, x: i32, y: i32);
+    fn mouse_button_up_event(&mut self, button: MouseButton, x: i32, y: i32);
+    fn mouse_motion_event(&mut self, state: MouseState, x: i32, y: i32, xrel: i32, yrel: i32);
+}
+
 /// Create the default keybindings for our input state.
-pub fn create_input_binding() -> input::InputBinding<Axis, Button> {
-    input::InputBinding::new()
+pub fn create_input_binding() -> InputBinding {
+    InputBinding::new()
         .bind_key_to_axis(Keycode::Up, Axis::Vert, true)
         .bind_key_to_axis(Keycode::Down, Axis::Vert, false)
         .bind_key_to_axis(Keycode::Left, Axis::Horz, false)

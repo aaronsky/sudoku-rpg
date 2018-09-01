@@ -145,7 +145,7 @@ impl GameboardView {
         cells_per_section: i32,
     ) -> GameResult<graphics::Mesh> {
         let ref settings = self.settings;
-        let mb = graphics::MeshBuilder::new();
+        let mut mb = graphics::MeshBuilder::new();
         for i in 0..cells {
             if (i % cells_per_section) == 0 {
                 continue;
@@ -156,10 +156,10 @@ impl GameboardView {
             let y2 = settings.position[1] + settings.size;
 
             let vline = &[Point2::new(x, settings.position[1]), Point2::new(x, y2)];
-            graphics::line(ctx, vline, settings.cell_edge_radius)?;
+            mb.line(vline, settings.cell_edge_radius);
 
             let hline = &[Point2::new(settings.position[0], y), Point2::new(x2, y)];
-            graphics::line(ctx, hline, settings.cell_edge_radius)?;
+            mb.line(hline, settings.cell_edge_radius);
         }
         mb.build(ctx)
     }
@@ -170,7 +170,7 @@ impl GameboardView {
         sections: i32,
     ) -> GameResult<graphics::Mesh> {
         let ref settings = self.settings;
-        let mb = graphics::MeshBuilder::new();
+        let mut mb = graphics::MeshBuilder::new();
         for i in 0..sections {
             let x = settings.position[0] + i as f32 / 3.0 * settings.size;
             let y = settings.position[1] + i as f32 / 3.0 * settings.size;
@@ -178,10 +178,10 @@ impl GameboardView {
             let y2 = settings.position[1] + settings.size;
 
             let vline = &[Point2::new(x, settings.position[1]), Point2::new(x, y2)];
-            graphics::line(ctx, vline, settings.section_edge_radius)?;
+            mb.line(vline, settings.section_edge_radius);
 
             let hline = &[Point2::new(settings.position[0], y), Point2::new(x2, y)];
-            graphics::line(ctx, hline, settings.section_edge_radius)?;
+            mb.line(hline, settings.section_edge_radius);
         }
         mb.build(ctx)
     }

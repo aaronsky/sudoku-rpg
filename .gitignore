@@ -2,3 +2,6 @@
 **/*.rs.bk
 Cargo.lock
 debug.log
+
+# windows
+SDL2.dll
