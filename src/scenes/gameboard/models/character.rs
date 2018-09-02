@@ -4,6 +4,7 @@ use ggez::Context;
 use warmy;
 use world::World;
 
+#[derive(Debug, Copy, Clone)]
 pub enum CharacterKind {
     Character,
     Opponent,

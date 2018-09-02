@@ -30,7 +30,7 @@ impl BackgroundView {
     }
 
     pub fn draw(&self, ctx: &mut Context) -> GameResult<()> {
-        let ref settings = self.settings;
+        let settings = &self.settings;
 
         graphics::set_color(ctx, graphics::WHITE)?;
 
@@ -42,7 +42,7 @@ impl BackgroundView {
             &(settings.image.borrow().0),
             DrawParam {
                 dest: pos,
-                scale: scale,
+                scale,
                 ..Default::default()
             },
         )?;

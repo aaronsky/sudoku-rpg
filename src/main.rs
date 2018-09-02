@@ -36,7 +36,7 @@ pub struct MainState {
 }
 
 impl MainState {
-    pub fn new(resource_dir: Option<path::PathBuf>, ctx: &mut Context) -> Self {
+    pub fn new(resource_dir: &Option<path::PathBuf>, ctx: &mut Context) -> Self {
         let world = world::World::new(ctx, resource_dir.clone());
         let mut scenestack = scenes::FSceneStack::new(ctx, world);
         let initial_scene = Box::new(scenes::GameboardScene::new(ctx, &mut scenestack.world));
@@ -133,7 +133,7 @@ pub fn main() {
 
     let ctx = &mut cb.build().unwrap();
 
-    let state = &mut MainState::new(cargo_path, ctx);
+    let state = &mut MainState::new(&cargo_path, ctx);
     if let Err(e) = event::run(ctx, state) {
         println!("Error encountered: {}", e);
     } else {

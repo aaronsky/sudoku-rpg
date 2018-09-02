@@ -1,4 +1,5 @@
 use super::super::models::Gameboard;
+use common::colors;
 use common::resources;
 use common::util::*;
 use ggez::graphics::{self, Color, Point2, Text};
@@ -45,16 +46,16 @@ impl GameboardViewSettings {
             ).unwrap();
         let font = &(warmy_font.borrow().0);
         let numbers = [
-            NumberView(Text::new(ctx, "0", &font)?, Color::from_rgb(0, 0, 0)),
-            NumberView(Text::new(ctx, "1", &font)?, Color::from_rgb(244, 54, 54)),
-            NumberView(Text::new(ctx, "2", &font)?, Color::from_rgb(255, 133, 0)),
-            NumberView(Text::new(ctx, "3", &font)?, Color::from_rgb(254, 193, 7)),
-            NumberView(Text::new(ctx, "4", &font)?, Color::from_rgb(139, 194, 74)),
-            NumberView(Text::new(ctx, "5", &font)?, Color::from_rgb(0, 151, 86)),
-            NumberView(Text::new(ctx, "6", &font)?, Color::from_rgb(0, 188, 213)),
-            NumberView(Text::new(ctx, "7", &font)?, Color::from_rgb(33, 150, 243)),
-            NumberView(Text::new(ctx, "8", &font)?, Color::from_rgb(91, 50, 183)),
-            NumberView(Text::new(ctx, "9", &font)?, Color::from_rgb(165, 40, 170)),
+            NumberView(Text::new(ctx, "0", &font)?, colors::BLACK),
+            NumberView(Text::new(ctx, "1", &font)?, colors::RED),
+            NumberView(Text::new(ctx, "2", &font)?, colors::ORANGE),
+            NumberView(Text::new(ctx, "3", &font)?, colors::YELLOW),
+            NumberView(Text::new(ctx, "4", &font)?, colors::LIGHT_GREEN),
+            NumberView(Text::new(ctx, "5", &font)?, colors::GREEN),
+            NumberView(Text::new(ctx, "6", &font)?, colors::LIGHT_BLUE),
+            NumberView(Text::new(ctx, "7", &font)?, colors::BLUE),
+            NumberView(Text::new(ctx, "8", &font)?, colors::INDIGO),
+            NumberView(Text::new(ctx, "9", &font)?, colors::PURPLE),
         ];
         let background = world
             .assets
@@ -65,12 +66,12 @@ impl GameboardViewSettings {
         Ok(GameboardViewSettings {
             position: Point2::new(55.0, 100.0),
             size: 400.0,
-            section_edge_color: From::from([0.0, 0.0, 0.0, 1.0]),
-            cell_edge_color: From::from([0.0, 0.0, 0.0, 1.0]),
+            section_edge_color: colors::BLACK,
+            cell_edge_color: colors::BLACK,
             section_edge_radius: 4.0,
             cell_edge_radius: 1.0,
             selected_cell_background_color: From::from([0.9, 0.9, 1.0, 1.0]),
-            text_color: From::from([0.0, 0.0, 0.0, 1.0]),
+            text_color: colors::BLACK,
             numbers,
             background,
         })
@@ -89,7 +90,7 @@ impl GameboardView {
     pub fn draw(&self, ctx: &mut Context, gameboard: &Gameboard) -> GameResult<()> {
         use ggez::graphics::{DrawMode, Rect};
 
-        let ref settings = self.settings;
+        let settings = &self.settings;
 
         graphics::set_color(ctx, graphics::WHITE)?;
         graphics::draw(
@@ -166,7 +167,7 @@ impl GameboardView {
         cells: i32,
         cells_per_section: i32,
     ) -> GameResult<graphics::Mesh> {
-        let ref settings = self.settings;
+        let settings = &self.settings;
         let mut mb = graphics::MeshBuilder::new();
         for i in 0..cells {
             if (i % cells_per_section) == 0 {
@@ -191,7 +192,7 @@ impl GameboardView {
         ctx: &mut Context,
         sections: i32,
     ) -> GameResult<graphics::Mesh> {
-        let ref settings = self.settings;
+        let settings = &self.settings;
         let mut mb = graphics::MeshBuilder::new();
         for i in 1..sections {
             let x = settings.position.x + i as f32 / 3.0 * settings.size;

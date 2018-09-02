@@ -57,17 +57,19 @@ impl Gameboard {
                 let (x, y) = current;
                 let (nrows, ncols) = self.cells.shape();
                 let new_x = if axis == input::Axis::Horz {
-                    match is_positive {
-                        true => checked_add(x, 1, nrows),
-                        false => checked_sub(x, 1, nrows),
+                    if is_positive {
+                        checked_add(x, 1, nrows)
+                    } else {
+                        checked_sub(x, 1, nrows)
                     }
                 } else {
                     x
                 };
                 let new_y = if axis == input::Axis::Vert {
-                    match is_positive {
-                        false => checked_add(y, 1, ncols),
-                        true => checked_sub(y, 1, ncols),
+                    if is_positive {
+                        checked_sub(y, 1, ncols)
+                    } else {
+                        checked_add(y, 1, ncols)
                     }
                 } else {
                     y

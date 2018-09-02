@@ -1,3 +1,4 @@
+use ggez::graphics::Point2;
 use ggez::*;
 use ggez_goodies::scene;
 use specs;
@@ -60,15 +61,13 @@ impl GameboardScene {
             timer_view: TimerView::new(TimerViewSettings::new(ctx, world)),
             character_portrait_view: PortraitView::new(PortraitViewSettings::new(
                 CharacterKind::Character,
-                500.0,
-                75.0,
+                Point2::new(500.0, 75.0),
                 ctx,
                 world,
             )),
             opponent_portrait_view: PortraitView::new(PortraitViewSettings::new(
                 CharacterKind::Opponent,
-                640.0,
-                75.0,
+                Point2::new(640.0, 75.0),
                 ctx,
                 world,
             )),
@@ -84,7 +83,7 @@ impl GameboardScene {
 
 impl scene::Scene<World, input::InputEvent> for GameboardScene {
     fn update(&mut self, gameworld: &mut World) -> FSceneSwitch {
-        self.dispatcher.dispatch(&mut gameworld.specs_world.res);
+        self.dispatcher.dispatch(&gameworld.specs_world.res);
         if self.gameboard.solved {
             scene::SceneSwitch::Pop
         } else {

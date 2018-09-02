@@ -40,7 +40,7 @@ impl AbilitiesView {
     }
 
     pub fn draw(&self, ctx: &mut Context, abilities: &[Ability]) -> GameResult<()> {
-        let ref settings = self.settings;
+        let settings = &self.settings;
 
         graphics::set_color(ctx, graphics::WHITE)?;
 
@@ -71,7 +71,7 @@ impl AbilitiesView {
         index: u32,
         horizontal_padding: f32,
     ) -> GameResult<()> {
-        let ref settings = self.settings;
+        let settings = &self.settings;
         let get_pos = |width, height, container_height| {
             let x =
                 settings.position.x + LEADING_PADDING + (horizontal_padding + width) * index as f32;

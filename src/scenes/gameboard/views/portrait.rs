@@ -1,17 +1,23 @@
 use super::super::models::{Character, CharacterKind};
 use common::resources;
-use ggez::graphics::{self, Point2};
+use common::util::*;
+use ggez::graphics::{self, Point2, Rect};
 use ggez::{Context, GameResult};
 use warmy;
 use world::World;
 
 pub struct PortraitViewSettings {
-    pub position: [f32; 2],
+    pub position: Point2,
     background: warmy::Res<resources::Image>,
 }
 
 impl PortraitViewSettings {
-    pub fn new(kind: CharacterKind, x: f32, y: f32, ctx: &mut Context, world: &mut World) -> Self {
+    pub fn new(
+        kind: CharacterKind,
+        position: Point2,
+        ctx: &mut Context,
+        world: &mut World,
+    ) -> Self {
         let kind_asset = match kind {
             CharacterKind::Character => "character",
             CharacterKind::Opponent => "opponent",
@@ -23,7 +29,7 @@ impl PortraitViewSettings {
                 ctx,
             ).unwrap();
         PortraitViewSettings {
-            position: [x, y],
+            position,
             background,
         }
     }
@@ -39,15 +45,30 @@ impl PortraitView {
     }
 
     pub fn draw(&self, ctx: &mut Context, character: &Character) -> GameResult<()> {
-        let ref settings = self.settings;
+        let settings = &self.settings;
 
         graphics::set_color(ctx, graphics::WHITE)?;
 
+        let background_image = &(settings.background.borrow().0);
         let pos = Point2::new(settings.position[0], settings.position[1]);
-        graphics::draw(ctx, &(settings.background.borrow().0), pos, 0.0)?;
+        graphics::draw(ctx, background_image, pos, 0.0)?;
 
-        let pos = Point2::new(settings.position[0], settings.position[1]);
-        graphics::draw(ctx, &(character.image.borrow().0), pos, 0.0)?;
+        let character_image = &(character.image.borrow().0);
+        let pos = center_rect_in_rect(
+            Rect::new(
+                0.0,
+                0.0,
+                character_image.width() as f32,
+                character_image.height() as f32,
+            ),
+            Rect::new(
+                settings.position.x,
+                settings.position.y,
+                background_image.width() as f32,
+                background_image.height() as f32,
+            ),
+        );
+        graphics::draw(ctx, character_image, pos, 0.0)?;
 
         Ok(())
     }

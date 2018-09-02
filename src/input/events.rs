@@ -3,10 +3,10 @@ use std::collections::HashMap;
 use std::hash::Hash;
 
 #[derive(Debug, Hash, Eq, PartialEq, Copy, Clone)]
-enum InputType {
-    KeyEvent(Keycode),
-    MouseButtonEvent(MouseButton),
-    MouseMotionEvent,
+enum InputEvent {
+    Key(Keycode),
+    MouseButton(MouseButton),
+    MouseMotion,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -63,7 +63,7 @@ where
     // Once EnumSet is stable it should be used for these
     // instead of BTreeMap. ♥?
     // Binding of keys to input values.
-    bindings: HashMap<InputType, InputEffect<Axes, Buttons>>,
+    bindings: HashMap<InputEvent, InputEffect<Axes, Buttons>>,
 }
 
 impl<Axes, Buttons> InputBinding<Axes, Buttons>
@@ -81,8 +81,8 @@ where
     /// logical axis.
     pub fn bind_key_to_axis(mut self, keycode: Keycode, axis: Axes, positive: bool) -> Self {
         self.bindings.insert(
-            InputType::KeyEvent(keycode),
-            InputEffect::Axis(axis.clone(), positive),
+            InputEvent::Key(keycode),
+            InputEffect::Axis(axis, positive),
         );
         self
     }
@@ -91,23 +91,23 @@ where
     /// logical button.
     pub fn bind_key_to_button(mut self, keycode: Keycode, button: Buttons) -> Self {
         self.bindings.insert(
-            InputType::KeyEvent(keycode),
-            InputEffect::Button(button.clone(), None),
+            InputEvent::Key(keycode),
+            InputEffect::Button(button, None),
         );
         self
     }
 
     pub fn bind_mouse_to_button(mut self, mouse: MouseButton, button: Buttons) -> Self {
         self.bindings.insert(
-            InputType::MouseButtonEvent(mouse),
-            InputEffect::Button(button.clone(), None),
+            InputEvent::MouseButton(mouse),
+            InputEffect::Button(button, None),
         );
         self
     }
 
     pub fn bind_mouse_motion(mut self) -> Self {
         self.bindings.insert(
-            InputType::MouseMotionEvent,
+            InputEvent::MouseMotion,
             InputEffect::MouseMotion(0, 0, 0, 0),
         );
         self
@@ -115,7 +115,7 @@ where
 
     /// Takes an physical input type and turns it into a logical input type (keycode -> axis/button).
     pub fn resolve_key(&self, keycode: Keycode) -> Option<InputEffect<Axes, Buttons>> {
-        self.bindings.get(&InputType::KeyEvent(keycode)).cloned()
+        self.bindings.get(&InputEvent::Key(keycode)).cloned()
     }
 
     pub fn resolve_mouse(
@@ -125,7 +125,7 @@ where
         y: i32,
     ) -> Option<InputEffect<Axes, Buttons>> {
         if let Some(InputEffect::Button(button, _)) =
-            self.bindings.get(&InputType::MouseButtonEvent(mouse))
+            self.bindings.get(&InputEvent::MouseButton(mouse))
         {
             Some(InputEffect::Button(button.clone(), Some((x, y))))
         } else {
@@ -141,7 +141,7 @@ where
         xrel: i32,
         yrel: i32,
     ) -> Option<InputEffect<Axes, Buttons>> {
-        if self.bindings.contains_key(&InputType::MouseMotionEvent) {
+        if self.bindings.contains_key(&InputEvent::MouseMotion) {
             Some(InputEffect::MouseMotion(x, y, xrel, yrel))
         } else {
             None
