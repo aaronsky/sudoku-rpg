@@ -10,6 +10,7 @@ use world::World;
 const PLACEHOLDER_SIZE: f32 = 70.0;
 const LEADING_PADDING: f32 = 15.0;
 
+#[derive(Debug, Clone)]
 pub struct AbilitiesViewSettings {
     pub position: Point2,
     pub size: Point2,
@@ -30,6 +31,7 @@ impl AbilitiesViewSettings {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct AbilitiesView {
     pub settings: AbilitiesViewSettings,
 }
@@ -89,11 +91,7 @@ impl AbilitiesView {
                 icon.height() as f32,
                 background.height() as f32,
             );
-            if ability.usable {
-                graphics::set_color(ctx, graphics::WHITE)?;
-            } else {
-                graphics::set_color(ctx, colors::GRAY)?;
-            }
+            graphics::set_color(ctx, graphics::WHITE)?;
             graphics::draw(ctx, &(ability.icon.borrow().0), pos, 0.0)?;
         } else {
             let pos = get_pos(70.0, 70.0, background.height() as f32);

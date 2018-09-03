@@ -4,6 +4,7 @@ use ggez::{Context, GameResult};
 use warmy;
 use world::World;
 
+#[derive(Debug, Clone)]
 pub struct TimerViewSettings {
     pub position: Point2,
     background: warmy::Res<resources::Image>,
@@ -22,6 +23,7 @@ impl TimerViewSettings {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct TimerView {
     pub settings: TimerViewSettings,
 }

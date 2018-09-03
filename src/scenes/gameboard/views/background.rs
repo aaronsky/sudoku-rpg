@@ -4,6 +4,7 @@ use ggez::{Context, GameResult};
 use warmy;
 use world::World;
 
+#[derive(Debug, Clone)]
 pub struct BackgroundViewSettings {
     image: warmy::Res<resources::Image>,
 }
@@ -20,6 +21,7 @@ impl BackgroundViewSettings {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct BackgroundView {
     pub settings: BackgroundViewSettings,
 }

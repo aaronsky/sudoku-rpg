@@ -6,6 +6,7 @@ use ggez::{Context, GameResult};
 use warmy;
 use world::World;
 
+#[derive(Debug, Clone)]
 pub struct PortraitViewSettings {
     pub position: Point2,
     background: warmy::Res<resources::Image>,
@@ -35,6 +36,7 @@ impl PortraitViewSettings {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct PortraitView {
     pub settings: PortraitViewSettings,
 }

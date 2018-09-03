@@ -4,13 +4,10 @@
 //! to every `Scene`: specs objects, input state, asset cache.
 
 use ggez;
-use specs;
-
-use warmy;
-
-use std::path;
-
 use input;
+use specs;
+use std::path;
+use warmy;
 
 pub struct World {
     pub assets: warmy::Store<ggez::Context>,

@@ -35,19 +35,19 @@ impl GameboardScene {
             character: Character::new(
                 "Main",
                 CharacterKind::Character,
-                "placeholder.png",
+                "Player_2.png",
                 ctx,
                 world,
             ).add_ability(Ability::new(
                 "Reveal Numbers",
-                "placeholder.png",
+                "Badge1",
                 ctx,
                 world,
             )),
             opponent: Character::new(
                 "Opponent",
                 CharacterKind::Opponent,
-                "placeholder.png",
+                "Enemy_3.png",
                 ctx,
                 world,
             ),

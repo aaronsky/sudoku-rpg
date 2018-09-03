@@ -15,6 +15,7 @@ impl Into<KuPoint> for Point {
 
 const ORDER: u8 = 3;
 
+#[derive(Debug, Clone)]
 pub struct Gameboard {
     problem: Sudoku,
     pub current: Sudoku,

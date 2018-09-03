@@ -10,6 +10,7 @@ pub enum CharacterKind {
     Opponent,
 }
 
+#[derive(Debug, Clone)]
 pub struct Character {
     pub name: String,
     pub kind: CharacterKind,

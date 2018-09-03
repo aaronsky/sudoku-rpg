@@ -7,6 +7,20 @@ use ggez::{Context, GameResult};
 use warmy;
 use world::World;
 
+#[derive(Debug, Clone)]
+struct NumberView(Text, Color);
+
+impl NumberView {
+    fn width(&self) -> u32 {
+        self.0.width()
+    }
+
+    fn height(&self) -> u32 {
+        self.0.height()
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct GameboardViewSettings {
     pub position: Point2,
     pub size: f32,
@@ -18,18 +32,6 @@ pub struct GameboardViewSettings {
     pub text_color: Color,
     numbers: [NumberView; 10],
     background: warmy::Res<resources::Image>,
-}
-
-struct NumberView(Text, Color);
-
-impl NumberView {
-    fn width(&self) -> u32 {
-        self.0.width()
-    }
-
-    fn height(&self) -> u32 {
-        self.0.height()
-    }
 }
 
 impl GameboardViewSettings {
@@ -78,6 +80,7 @@ impl GameboardViewSettings {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct GameboardView {
     pub settings: GameboardViewSettings,
 }
