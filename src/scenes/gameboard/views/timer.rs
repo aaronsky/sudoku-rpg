@@ -31,7 +31,7 @@ impl TimerView {
         TimerView { settings }
     }
 
-    pub fn draw(&self, ctx: &mut Context, time: u64) -> GameResult<()> {
+    pub fn draw(&self, ctx: &mut Context, _time: u64) -> GameResult<()> {
         let settings = &self.settings;
 
         graphics::set_color(ctx, graphics::WHITE)?;

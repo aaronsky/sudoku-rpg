@@ -1,4 +1,4 @@
-use super::super::models::Gameboard;
+use super::super::models::{Gameboard, Point};
 use common::colors;
 use common::resources;
 use common::util::*;
@@ -70,7 +70,7 @@ impl GameboardViewSettings {
             cell_edge_color: colors::BLACK,
             section_edge_radius: 4.0,
             cell_edge_radius: 1.0,
-            selected_cell_background_color: From::from([0.9, 0.9, 1.0, 1.0]),
+            selected_cell_background_color: From::from([0.9, 0.9, 1.0, 0.5]),
             text_color: colors::BLACK,
             numbers,
             background,
@@ -100,7 +100,9 @@ impl GameboardView {
             0.0,
         )?;
 
-        if let Some((x, y)) = gameboard.selected_cell {
+        self.draw_numbers_for_board(ctx, gameboard, colors::GRAY)?;
+
+        if let Some(Point(x, y)) = gameboard.selected_cell {
             let cell_size = settings.size / 9.0;
             let pos = Point2::new(x as f32 * cell_size, y as f32 * cell_size);
             graphics::set_color(ctx, settings.selected_cell_background_color)?;
@@ -116,40 +118,6 @@ impl GameboardView {
             )?;
         }
 
-        let cell_size = settings.size / 9.0;
-        for j in 0..9 {
-            for i in 0..9 {
-                if let Some(ind) = gameboard.get((i, j)) {
-                    let text = &settings.numbers[ind as usize];
-                    let text_pos = center_rect_in_rect(
-                        Rect::new(
-                            0.0,
-                            0.0,
-                            text.width() as f32 / 2.0,
-                            text.height() as f32 / 2.0,
-                        ),
-                        Rect::new(
-                            settings.position.x + i as f32 * cell_size,
-                            settings.position.y + j as f32 * cell_size,
-                            cell_size,
-                            cell_size,
-                        ),
-                    );
-                    let text_scale = Point2::new(0.5, 0.5);
-                    graphics::draw_ex(
-                        ctx,
-                        &text.0,
-                        graphics::DrawParam {
-                            dest: Point2::new(text_pos.x, text_pos.y + 4.0),
-                            color: Some(text.1),
-                            scale: text_scale,
-                            ..Default::default()
-                        },
-                    )?;
-                }
-            }
-        }
-
         let cell_edge_mesh = self.build_cell_edge_mesh(ctx, 9, 3)?;
         graphics::set_color(ctx, settings.cell_edge_color)?;
         graphics::draw_ex(ctx, &cell_edge_mesh, Default::default())?;
@@ -158,6 +126,58 @@ impl GameboardView {
         graphics::set_color(ctx, settings.section_edge_color)?;
         graphics::draw_ex(ctx, &section_edge_mesh, Default::default())?;
 
+        Ok(())
+    }
+
+    fn draw_numbers_for_board(
+        &self,
+        ctx: &mut Context,
+        board: &Gameboard,
+        background: Color,
+    ) -> GameResult<()> {
+        use ggez::graphics::{DrawMode, Rect};
+        use sudoku::Element;
+
+        let settings = &self.settings;
+        let size = settings.size / 9.0;
+
+        for point in board.points() {
+            let x = point[0];
+            let y = point[1];
+            let cell = Rect::new(
+                settings.position.x + x as f32 * size,
+                settings.position.y + y as f32 * size,
+                size,
+                size,
+            );
+            if let Some(Element(value)) = board.current[point] {
+                if !board.is_mutable(Point(x, y)) {
+                    graphics::set_color(ctx, background)?;
+                    graphics::rectangle(ctx, DrawMode::Fill, cell)?;
+                }
+                let text = &settings.numbers[value as usize];
+                let text_pos = center_rect_in_rect(
+                    Rect::new(
+                        0.0,
+                        0.0,
+                        text.width() as f32 / 2.0,
+                        text.height() as f32 / 2.0,
+                    ),
+                    cell,
+                );
+                let text_scale = Point2::new(0.5, 0.5);
+                graphics::draw_ex(
+                    ctx,
+                    &text.0,
+                    graphics::DrawParam {
+                        dest: Point2::new(text_pos.x, text_pos.y + 4.0),
+                        color: Some(text.1),
+                        scale: text_scale,
+                        ..Default::default()
+                    },
+                )?;
+            }
+        }
         Ok(())
     }
 

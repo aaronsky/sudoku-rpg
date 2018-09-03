@@ -80,20 +80,16 @@ where
     /// Adds a key binding connecting the given keycode to the given
     /// logical axis.
     pub fn bind_key_to_axis(mut self, keycode: Keycode, axis: Axes, positive: bool) -> Self {
-        self.bindings.insert(
-            InputEvent::Key(keycode),
-            InputEffect::Axis(axis, positive),
-        );
+        self.bindings
+            .insert(InputEvent::Key(keycode), InputEffect::Axis(axis, positive));
         self
     }
 
     /// Adds a key binding connecting the given keycode to the given
     /// logical button.
     pub fn bind_key_to_button(mut self, keycode: Keycode, button: Buttons) -> Self {
-        self.bindings.insert(
-            InputEvent::Key(keycode),
-            InputEffect::Button(button, None),
-        );
+        self.bindings
+            .insert(InputEvent::Key(keycode), InputEffect::Button(button, None));
         self
     }
 

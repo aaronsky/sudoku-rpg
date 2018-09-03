@@ -1,39 +1,74 @@
-use ggez::nalgebra::{zero, MatrixN as Matrix, U9};
 use input;
-use std::collections::HashSet;
+use sudoku::{self, Element, Generate, Grid, Point as KuPoint, Puzzle, Solve, Sudoku};
 
-lazy_static! {
-    static ref FIXED_SET: HashSet<u8> = (1..=9).collect();
+#[derive(Debug, Copy, Clone)]
+pub struct Point(pub u8, pub u8);
+impl Into<KuPoint> for Point {
+    fn into(self) -> KuPoint {
+        let Point(x, y) = self;
+        let mut new_point = KuPoint::origin();
+        new_point[0] = x;
+        new_point[1] = y;
+        new_point
+    }
 }
 
+const ORDER: u8 = 3;
+
 pub struct Gameboard {
-    cells: Matrix<u8, U9>,
-    pub selected_cell: Option<(usize, usize)>,
-    pub solved: bool,
+    problem: Sudoku,
+    pub current: Sudoku,
+    pub solution: Sudoku,
+    pub moves: usize,
+    pub selected_cell: Option<Point>,
 }
 
 impl Gameboard {
-    pub fn new() -> Self {
-        Gameboard {
-            cells: zero(),
+    pub fn new(difficulty: sudoku::Difficulty) -> Self {
+        let problem = Sudoku::generate(ORDER, difficulty);
+        let current = problem.clone();
+        let solution = problem.solution().unwrap();
+        Self {
+            problem,
+            current,
+            solution,
+            moves: 0,
             selected_cell: None,
-            solved: false,
         }
     }
 
-    pub fn get(&self, ind: (usize, usize)) -> Option<u8> {
-        match self.cells[ind] {
-            cell @ 1..=9 => Some(cell),
-            _ => None,
-        }
+    pub fn insertion_is_correct(&self, point: Point, value: Element) -> bool {
+        self.solution[point.into()] == Some(value)
     }
 
-    pub fn set(&mut self, ind: (usize, usize), val: u8) {
-        self.cells[ind] = val;
+    pub fn insert(&mut self, point: Point, value: Element) {
+        self.current = self.current.substitute(point.into(), Some(value));
+        self.moves += 1;
     }
 
-    pub fn clear(&mut self, ind: (usize, usize)) {
-        self.cells[ind] = 0;
+    pub fn remove(&mut self, point: Point) -> Option<Element> {
+        self.moves += 1;
+        let value = self.current[point.into()];
+        self.current = self.current.substitute(point.into(), None);
+        value
+    }
+
+    pub fn is_mutable(&self, point: Point) -> bool {
+        self.problem[point.into()].is_none()
+    }
+
+    pub fn size(&self) -> [u8; sudoku::DIMENSIONS] {
+        let order = self.solution.order() as u8;
+        let dim = order.pow(sudoku::DIMENSIONS as u32);
+        [dim; sudoku::DIMENSIONS]
+    }
+
+    pub fn points(&self) -> Vec<KuPoint> {
+        self.current.points()
+    }
+
+    pub fn is_solved(&self) -> bool {
+        self.current == self.solution
     }
 
     pub fn move_selected_cell(&mut self, axis: input::Axis, is_positive: bool) {
@@ -52,10 +87,12 @@ impl Gameboard {
             }
         };
 
+        let [nrows, ncols] = self.size();
+        let [center_x, center_y] = [nrows / 2, ncols / 2];
+
         self.selected_cell = match self.selected_cell {
-            Some(current) => {
-                let (x, y) = current;
-                let (nrows, ncols) = self.cells.shape();
+            Some(ref current) => {
+                let [x, y] = [current.0, current.1];
                 let new_x = if axis == input::Axis::Horz {
                     if is_positive {
                         checked_add(x, 1, nrows)
@@ -74,37 +111,9 @@ impl Gameboard {
                 } else {
                     y
                 };
-                Some((new_x, new_y))
+                Some(Point(new_x, new_y))
             }
-            None => Some((0, 0)),
+            None => Some(Point(center_x, center_y)),
         }
-    }
-
-    pub fn check_solution(&self) -> bool {
-        // check each row
-        // check each column
-        // check each grid
-        false
-    }
-
-    fn check_row(&self, ind: usize) -> bool {
-        // let row = self.cells.row(ind);
-        // let blanks = row.iter().filter(|v| **v == 0).count();
-        // if blanks > 0 {
-        //     false
-        // } else {
-        //     let row_set: HashSet<_> = row.iter().filter(|v| **v != 0).collect();
-        //     row_set.len() == FIXED_SET.len()
-        // }
-        false
-    }
-
-    fn check_col(&self, ind: usize) -> bool {
-        // let column = self.cells.fold
-        false
-    }
-
-    fn check_grid(&self, row: usize, col: usize) -> bool {
-        false
     }
 }

@@ -23,8 +23,8 @@ impl Ability {
         }
     }
 
-    pub fn set_usable(mut self, value: bool) -> Self {
-        self.usable = value;
-        self
-    }
+    // pub fn set_usable(mut self, value: bool) -> Self {
+    //     self.usable = value;
+    //     self
+    // }
 }
